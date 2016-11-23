@@ -1,5 +1,21 @@
 .App {
   text-align: center;
-  width:  30%;
+  width:  80%;
   margin: 60px auto;
+}
+
+.demo-card-wide.mdl-card {
+  width: 512px;
+  margin: 50px auto;
+}
+.demo-card-wide > .mdl-card__title {
+  color: crimson;
+  /* background: url('../assets/demos/welcome_card.jpg') center / cover; */
+}
+.demo-card-wide > .mdl-card__menu {
+  color: indianred;
+}
+
+.demo-card-wide.mdl-card input{
+  outline: none;
 }

@@ -1,40 +1,39 @@
 import React, { Component } from 'react';
 
-import Recent from './components/recent';
-import Alltime from './components/alltime';
+import AddingForm from './components/addingform.js';
+
 import './App.css';
+import './material.min.css';
 
 class App extends Component {
   constructor(props) {
-    super();
-    this.state = { 
-      alltime: true,
-      view: 'Recent',
-      url: 'alltime.json',
-      data: null
-    };
+    super(props);
+    this.state = {
+      adding : false,
+      editing: false,
+    }
   }
 
-  handleDisplay(){
+  addRecipe(){
     this.setState({
-      alltime: !this.state.alltime,
-      view: this.state.alltime ? 'Alltime' : 'Recent',
-      url: this.state.alltime ? 'alltime.json' : 'recent.json'
-    });
+      adding: !this.state.adding
+    })
   }
-
+  
   render() {
     var show = null;
-    if(this.state.alltime){
-      show = <Alltime  data={this.state.data}/>;
+    if(this.state.adding){
+      show = <AddingForm />;
     }else{
-      show = <Recent data={this.state.data}/>;
+      show = null;
     }
 
     return (
       <div className="App">
-          <button onClick={this.handleDisplay.bind(this)}>View {this.state.view}</button>
-          {show}
+          <button onClick={this.addRecipe.bind(this)} className="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+              <i className="material-icons">+</i>
+          </button>
+          {show}          
       </div>
     );
   }
