@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import AddingForm from './components/addingform.js';
+import Recipes from './components/recipes.js';
 
 import './App.css';
 import './material.min.css';
@@ -25,7 +26,7 @@ class App extends Component {
     if(this.state.adding){
       show = <AddingForm />;
     }else{
-      show = null;
+      show = <Recipes />;
     }
 
     return (
