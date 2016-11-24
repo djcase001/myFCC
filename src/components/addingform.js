@@ -2,8 +2,15 @@ import React, { Component } from 'react';
 
 export default class AddingForm extends Component {
 	constructor(props){
-		super()
+		super(props)
 		this.state = {};
+	}
+
+	addRecipe(){
+		var inputs = document.getElementsByTagName('input');
+		if(inputs[0].value !== "" && inputs[1].value !== ""){
+			this.props.buildRecipe(inputs[0].value, inputs[1].value);
+		}
 	}
 
 	render(){
@@ -21,7 +28,7 @@ export default class AddingForm extends Component {
             </form>
             
             <div className="mdl-card__actions mdl-card--border">
-              <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">
+              <button onClick={this.addRecipe.bind(this)}  className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">
                 Add Recipe
               </button>
               <button className="mdl-button mdl-js-button mdl-button--accent">

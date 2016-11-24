@@ -19,3 +19,8 @@
 .demo-card-wide.mdl-card input{
   outline: none;
 }
+
+button.btn{
+  display: inline-block;
+  margin-right:  10px;
+}

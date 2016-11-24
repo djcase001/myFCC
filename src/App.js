@@ -12,21 +12,36 @@ class App extends Component {
     this.state = {
       adding : false,
       editing: false,
+      recipes: [{ name: "Cassolet", ingredients: "Pois, farine, Sel"},
+       {name: "Mais au Lait", ingredients: "Mais, Lait"}]
     }
+
   }
 
   addRecipe(){
     this.setState({
       adding: !this.state.adding
+    });
+  }
+
+  addingRecipe(name, ingredients){
+    var recipes = this.state.recipes;
+    var toBeAdded = {
+      name: name,
+      ingredients: ingredients
+    };
+    recipes.push(toBeAdded);
+    this.setState({
+      recipes: recipes
     })
   }
   
   render() {
     var show = null;
     if(this.state.adding){
-      show = <AddingForm />;
+      show = <AddingForm buildRecipe={this.addingRecipe.bind(this)}/>;
     }else{
-      show = <Recipes />;
+      show = <Recipes data={this.state.recipes}/>;
     }
 
     return (
