@@ -13,15 +13,45 @@ class App extends Component {
       adding : false,
       editing: false,
       recipes: [{ name: "Cassolet", ingredients: "Pois, farine, Sel"},
-       {name: "Mais au Lait", ingredients: "Mais, Lait"}]
+       {name: "Mais au Lait", ingredients: "Mais, Lait"}],
+      recipe: null,
+      recipeId: null
     }
 
   }
 
+  cancel(){
+    this.setState({
+      editing: false,
+      adding: false
+    });
+  }
+
   addRecipe(){
     this.setState({
-      adding: !this.state.adding
+      adding: !this.state.adding,
+      editing: false
     });
+  }
+
+  editRecipe(){
+    this.setState({
+      editing: !this.state.editing,
+      adding: false
+    });
+  }
+
+  updateRecipe(name, ingredients, i){
+    var arr = this.state.recipes;
+    arr[i]= {
+      name: name,
+      ingredients: ingredients
+    };
+    this.setState({
+      recipes: arr,
+      editing: false
+    });
+
   }
 
   addingRecipe(name, ingredients){
@@ -32,16 +62,43 @@ class App extends Component {
     };
     recipes.push(toBeAdded);
     this.setState({
-      recipes: recipes
-    })
+      recipes: recipes,
+      adding: false
+    }); 
+  }
+
+  editingRecipe(i){
+    this.editRecipe();
+    this.setState({
+      recipe: this.state.recipes[i],
+      recipeId: i
+    });
+  }
+
+  deleteRecipe(id){
+    var arr = this.state.recipes;
+    arr.splice(id, 1);
+    this.setState({
+      recipes: arr
+    });
+  }
+
+  eachRecipe(recipe, i){
+     return (<Recipes key={i} index={i} 
+      data={recipe}
+      onRemove={this.deleteRecipe.bind(this)}
+      onUpdate={this.editingRecipe.bind(this)}
+      />);
   }
   
   render() {
     var show = null;
     if(this.state.adding){
-      show = <AddingForm buildRecipe={this.addingRecipe.bind(this)}/>;
+      show = <AddingForm cancelOperations={this.cancel.bind(this)} buildRecipe={this.addingRecipe.bind(this)}/>;
+    }else if(this.state.editing){
+      show = <AddingForm cancelOperations={this.cancel.bind(this)} index={this.state.recipeId} recipe={this.state.recipe} editRecipe={this.updateRecipe.bind(this)}/>;
     }else{
-      show = <Recipes data={this.state.recipes}/>;
+      show = this.state.recipes.map((recipe, i) => this.eachRecipe(recipe, i));
     }
 
     return (

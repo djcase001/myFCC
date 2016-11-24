@@ -7,20 +7,28 @@ class Recipes extends Component {
 	// 	super(props)
 		
 	// }
+	deleteRecipe(){
+		this.props.onRemove(this.props.index);
+	}
 
+	updateRecipe(){
+		this.props.onUpdate(this.props.index);
+	}
 	
 	render(){
 
-		var recipe = this.props.data.map((item, i) => <div className="demo-card-wide mdl-card mdl-shadow--2dp" key={i}>
+					
+
+	      return (<div className="demo-card-wide mdl-card mdl-shadow--2dp">
 					  <div className="mdl-card__title">
-					    <h2 className="mdl-card__title-text">{item.name}</h2>
+					    <h2 className="mdl-card__title-text">{this.props.data.name}</h2>
 					  </div>
-					 <Ingredients item={item.ingredients}/>
+					 <Ingredients item={this.props.data.ingredients}/>
 					  <div className="mdl-card__actions mdl-card--border">
-					    <button className="btn mdl-button  mdl-js-button mdl-js-ripple-effect">
+					    <button onClick={this.updateRecipe.bind(this)} className="btn mdl-button  mdl-js-button mdl-js-ripple-effect">
 					      Edit
 					    </button>
-					    <button className="btn mdl-button mdl-js-button mdl-button--colored">
+					    <button onClick={this.deleteRecipe.bind(this)} className="btn mdl-button mdl-js-button mdl-button--colored">
 					      Delete
 					    </button>
 					  </div>
@@ -30,10 +38,6 @@ class Recipes extends Component {
 					    </button>
 					  </div>
 				  	</div>);
-
-	      return (<div>
-	      			{recipe}
-	      		</div>);
 	}
 }
 
