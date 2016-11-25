@@ -4,20 +4,17 @@ import AddingForm from './components/addingform.js';
 import Recipes from './components/recipes.js';
 
 import './App.css';
-import './material.min.css';
-
+// import './material.min.css';
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       adding : false,
       editing: false,
-      recipes: [{ name: "Cassolet", ingredients: "Pois, farine, Sel"},
-       {name: "Mais au Lait", ingredients: "Mais, Lait"}],
+      recipes: JSON.parse(this.props.data),
       recipe: null,
       recipeId: null
     }
-
   }
 
   cancel(){
@@ -25,6 +22,7 @@ class App extends Component {
       editing: false,
       adding: false
     });
+
   }
 
   addRecipe(){
@@ -47,8 +45,9 @@ class App extends Component {
       name: name,
       ingredients: ingredients
     };
+    this.props.storage.setItem("recipes", JSON.stringify(arr));
     this.setState({
-      recipes: arr,
+      recipes: this.state.recipes,
       editing: false
     });
 
@@ -60,9 +59,13 @@ class App extends Component {
       name: name,
       ingredients: ingredients
     };
+    
+    
     recipes.push(toBeAdded);
+    console.dir(recipes);
+    this.props.storage.setItem("recipes", JSON.stringify(recipes));
     this.setState({
-      recipes: recipes,
+      recipes: this.state.recipes,
       adding: false
     }); 
   }
@@ -78,8 +81,9 @@ class App extends Component {
   deleteRecipe(id){
     var arr = this.state.recipes;
     arr.splice(id, 1);
+    this.props.storage.setItem('recipes', JSON.stringify(arr));
     this.setState({
-      recipes: arr
+      recipes: this.state.recipes
     });
   }
 
@@ -92,6 +96,7 @@ class App extends Component {
   }
   
   render() {
+    // console.log(this.state.recipes);
     var show = null;
     if(this.state.adding){
       show = <AddingForm cancelOperations={this.cancel.bind(this)} buildRecipe={this.addingRecipe.bind(this)}/>;
@@ -106,7 +111,9 @@ class App extends Component {
           <button onClick={this.addRecipe.bind(this)} className="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
               <i className="material-icons">+</i>
           </button>
-          {show}          
+          <ul className="recipe list">
+            {show}
+          </ul>       
       </div>
     );
   }

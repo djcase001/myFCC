@@ -18,26 +18,24 @@ class Recipes extends Component {
 	render(){
 
 					
-
-	      return (<div className="demo-card-wide mdl-card mdl-shadow--2dp">
-					  <div className="mdl-card__title">
-					    <h2 className="mdl-card__title-text">{this.props.data.name}</h2>
-					  </div>
-					 <Ingredients item={this.props.data.ingredients}/>
-					  <div className="mdl-card__actions mdl-card--border">
-					    <button onClick={this.updateRecipe.bind(this)} className="btn mdl-button  mdl-js-button mdl-js-ripple-effect">
-					      Edit
-					    </button>
-					    <button onClick={this.deleteRecipe.bind(this)} className="btn mdl-button mdl-js-button mdl-button--colored">
-					      Delete
-					    </button>
-					  </div>
-					  <div className="mdl-card__menu">
-					    <button className="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect">
-					      <i className="material-icons">+</i>
-					    </button>
-					  </div>
-				  	</div>);
+				
+	      return (<div>
+				    <li id={'recipe'+ this.props.index} className="item">
+				      <a href={'#recipe'+ this.props.index}>
+				        <h3>{this.props.data.name}</h3>
+				      </a>
+				      <h4>Ingredients</h4>
+				      <Ingredients item={this.props.data.ingredients}/>
+				     <div className="btn-container">
+				       <button onClick={this.updateRecipe.bind(this)} className="btn">
+				      Edit
+				      </button>
+				      <button onClick={this.deleteRecipe.bind(this)} className="btn">
+				        Delete
+				      </button>
+				     </div>
+				    </li>
+				    </div>);
 	}
 }
 
