@@ -96,7 +96,6 @@ class App extends Component {
   }
   
   render() {
-    // console.log(this.state.recipes);
     var show = null;
     if(this.state.adding){
       show = <AddingForm cancelOperations={this.cancel.bind(this)} buildRecipe={this.addingRecipe.bind(this)}/>;
@@ -108,7 +107,7 @@ class App extends Component {
 
     return (
       <div className="App">
-          <button onClick={this.addRecipe.bind(this)} className="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+          <button onClick={this.addRecipe.bind(this)} className="btn-header">
               <i className="material-icons">+</i>
           </button>
           <ul className="recipe list">

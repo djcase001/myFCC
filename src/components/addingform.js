@@ -13,16 +13,18 @@ export default class AddingForm extends Component {
   }
 
 	addRecipe(){
-		var inputs = document.getElementsByTagName('input');
-    if(inputs[0].value !== "" && inputs[1].value !== ""){
-      this.props.buildRecipe(inputs[0].value, inputs[1].value);
+    var inputs = document.getElementsByTagName('input');
+		var txtarea = document.getElementsByTagName('textarea');
+    if(inputs[0].value !== "" && txtarea[0].value !== ""){
+      this.props.buildRecipe(inputs[0].value, txtarea[0].value);
     }
 	}
 
   updateRecipe(){
     var inputs = document.getElementsByTagName('input');
-    if(inputs[0].value !== "" && inputs[1].value !== ""){
-      this.props.editRecipe(inputs[0].value, inputs[1].value, this.props.index);
+    var txtarea = document.getElementsByTagName('textarea');
+    if(inputs[0].value !== "" && txtarea[0].value !== ""){
+      this.props.editRecipe(inputs[0].value, txtarea[0].value, this.props.index);
     }
   }
 
@@ -32,9 +34,9 @@ export default class AddingForm extends Component {
       var bouton = null;
       if(this.props.recipe){
           show = (<form>
-              <div className="mdl-textfield mdl-js-textfield">
-                <input defaultValue={this.state.recipe.name} className="mdl-textfield__input" type="text" placeholder="recipe's name"/>
-                <input defaultValue={this.state.recipe.ingredients} className="mdl-textfield__input" type="text" placeholder="recipe's ingredients"/>
+              <div className="textfield-container">
+                <input className="textfield" type="text" placeholder="recipe's name" defaultValue={this.state.recipe.name} />
+                <textarea className="textfield" cols="20" rows="5" maxlength="140"   defaultValue={this.state.recipe.ingredients}  type="text" placeholder="recipe's ingredients"></textarea>
               </div>
             </form>);
           bouton = (<button onClick={this.updateRecipe.bind(this)}  className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">
@@ -42,26 +44,26 @@ export default class AddingForm extends Component {
               </button>);
       }else{
         show = (<form>
-              <div className="mdl-textfield mdl-js-textfield">
-                <input className="mdl-textfield__input" type="text" placeholder="recipe's name"/>
-                <input className="mdl-textfield__input" type="text" placeholder="recipe's ingredients"/>
+              <div className="textfield-container">
+                <input className="textfield" type="text" placeholder="recipe's name"  />
+                <textarea className="textfield" cols="20" rows="5" maxlength="140" type="text" placeholder="recipe's ingredients"></textarea>
               </div>
             </form>);
-        bouton = (<button onClick={this.addRecipe.bind(this)}  className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">
+        bouton = (<button onClick={this.addRecipe.bind(this)}  className="btn">
                 Add Recipe
               </button>);
       }
 
 	      return (
-          <div className="demo-card-wide mdl-card mdl-shadow--2dp">
-            <div className="mdl-card__title">
-              <h2 className="mdl-card__title-text">Add a recipe</h2>
+          <div className="card form-container">
+            <div className="card-title">
+              <h2 className="card-title-text">Add a recipe</h2>
             </div>
             {show}
             
-            <div className="mdl-card__actions mdl-card--border">
+            <div className="btn-container">
               {bouton}
-              <button onClick={this.cancelOp.bind(this)} className="mdl-button mdl-js-button mdl-button--accent">
+              <button onClick={this.cancelOp.bind(this)} className="btn">
                 Close
               </button>
             </div>
