@@ -27,7 +27,7 @@ class App extends Component {
 
   addRecipe(){
     this.setState({
-      adding: !this.state.adding,
+      adding: true,
       editing: false
     });
   }
@@ -108,7 +108,7 @@ class App extends Component {
     return (
       <div className="App">
           <button onClick={this.addRecipe.bind(this)} className="btn-header">
-              <i className="material-icons">+</i>
+              <i>+</i>
           </button>
           <ul className="recipe list">
             {show}
