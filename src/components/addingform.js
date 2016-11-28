@@ -36,7 +36,7 @@ export default class AddingForm extends Component {
           show = (<form>
               <div className="textfield-container">
                 <input className="textfield" type="text" placeholder="recipe's name" defaultValue={this.state.recipe.name} />
-                <textarea className="textfield" cols="20" rows="5" maxlength="140"   defaultValue={this.state.recipe.ingredients}  type="text" placeholder="recipe's ingredients"></textarea>
+                <textarea className="textfield" cols="20" rows="5" maxLength="140"   defaultValue={this.state.recipe.ingredients}  type="text" placeholder="recipe's ingredients"></textarea>
               </div>
             </form>);
           bouton = (<button onClick={this.updateRecipe.bind(this)}  className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">
