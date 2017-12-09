@@ -1,34 +1,64 @@
-import React, { Component } from 'react';
-import { Button, Container, Header, Form, Input, Icon } from 'semantic-ui-react';
+import React, {
+    Component
+} from 'react';
+
 
 class SignIn extends Component {
-    constructor(props){
+    constructor(props) {
         super(props)
         this.LOGIN = this.LOGIN.bind(this);
     }
-    LOGIN(){
-        const email = this.emailInput.inputRef.value;
-        const password = this.passwordInput.inputRef.value;
-        console.log(email, password);
-        this.props.login(email, password, "login");
+
+    LOGIN() {
+        this.props.login(this.emailInput.value, this.passwordInput.value, "login");
     }
 
-    render(){
-        return(
-            <Form.Field>
-            <Header content="Se connecter" />
-            <label>Enter Email</label>
-            <Input type='email' name='email' ref={(input) => { this.emailInput = input}}/>
-            <label>Enter Password</label>
-                <Input type='password' name='password' ref={(input) => { this.passwordInput = input}}/>
-                    <Input
-                type="submit"
-                content="Submit"
-                onClick={this.LOGIN}
-                />
-                    </Form.Field>
-                )
-}
+    render() {
+        if(this.props.error){
+            var mode = (<div className="ui error message visible">
+                            <i className="close icon"></i>
+                            <div className="header">
+                                {this.props.error}
+                            </div>
+                        </div>);
+        }else{
+            var mode = (<div className="ui error message hidden">
+                            <i className="close icon"></i>
+                            <div className="header">
+                                {this.props.error}
+                            </div>
+                        </div>);
+        }
+        return (
+            <div>
+                <h2 className="ui teal image header">
+                    <img className="image" />
+                    <div className="content">Se Connecter</div>
+                </h2>
+                <form className="ui large form">
+                    <div className="ui stacked segment" >
+                        <div className="field" >
+                            <div className="ui left icon input" >
+                                <i className="user icon" > < /i>
+                                <input type = "email"      name="email" placeholder = "E-mail address" ref = {(input) => { this.emailInput = input }} />
+                            </div>
+                        </div>
+                        <div className="field" >
+                            <div className="ui left icon input" >
+                                <i className="lock icon"> </i>
+                                <input type = "password" name="password" placeholder="Password" ref={(input) => {this.passwordInput = input}}/>
+                            </div>
+                        </div>
+                        <div className="ui fluid large teal submit button" onClick={this.LOGIN} >
+                            Se Connecter
+                        </div>
+                    </div>
+                    {mode}
+                </form>
+            </div>
+
+        )
+    }
 }
 
 export default SignIn;

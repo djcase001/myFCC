@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Container, Header, Form, Input, Icon } from 'semantic-ui-react';
+//import { Button, Container, Header, Form, Input, Icon } from 'semantic-ui-react';
 
 class SignUp extends Component {
     constructor(props){
@@ -8,26 +8,42 @@ class SignUp extends Component {
     }
 
     SIGNUP (){
-        const email = this.emailInput.inputRef.value;
-        const password = this.passwordInput.inputRef.value;
-        console.log(email, password);
-        this.props.signup(email, password, "signup");
+        this.props.signup(this.emailInputSignUp.value, this.passwordInputSignUp.value, "signup");
     }
 
     render(){
+        if(this.props.error){
+            var mode = (<div className="ui error message visible">{this.props.error}</div>);
+        }else{
+            var mode = (<div className="ui error message hidden">{this.props.error}</div>);
+        }
         return(
-            <Form.Field>
-            <Header content="S'inscrire" />
-            <label>Enter Email</label>
-            <Input type='email' name='email' ref={(input) => { this.emailInput = input}}/>
-            <label>Enter Password</label>
-            <Input type='password' name='password' ref={(input) => { this.passwordInput = input}}/>
-            <Input
-            type="submit"
-            content="Inscrire"
-            onClick={this.SIGNUP}
-            />
-                </Form.Field>
+            <div>
+                <h2 className="ui teal image header">
+                    <img className="image" />
+                    <div className="content">S'Inscrire</div>
+                </h2>
+                <form className="ui large form">
+                    <div className="ui stacked segment" >
+                        <div className="field" >
+                            <div className="ui left icon input" >
+                                <i className="user icon" > < /i>
+                                <input type = "email"  name="email" placeholder = "E-mail address" ref={(input) => { this.emailInputSignUp = input }} />
+                            </div>
+                        </div>
+                        <div className="field" >
+                            <div className="ui left icon input" >
+                                <i className="lock icon"> </i>
+                                <input type = "password" name="password" placeholder="Password" ref={(input) => {this.passwordInputSignUp = input}}/>
+                            </div>
+                        </div>
+                        <div className="ui fluid large teal submit button" onClick={this.SIGNUP} >
+                            S'Inscrire
+                        </div>
+                    </div>
+                    {mode}
+                </form>
+            </div>
         )
     }
 }

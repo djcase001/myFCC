@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button} from 'semantic-ui-react';
+//import { Button} from 'semantic-ui-react';
 //import { Button, Container, Header, Form, Input, Icon } from 'semantic-ui-react';
 import './auth.css';
 import SignIn from './signin';
@@ -33,14 +33,17 @@ class Auth extends Component {
     }
 
     render() {
-        var view = this.state.login ? <SignIn login = {this.triggerSubmit}/> : <SignUp signup = {this.triggerSubmit}/>
-
+        var view = this.state.login ? <SignIn error={this.props.errMessage} login={this.triggerSubmit}/> : <SignUp error={this.props.errMessage} signup={this.triggerSubmit}/> ;
+        var mesaj = this.state.login ? "Nouveau?" : "Deja membre?";
         var whichForm = this.state.login ? "S'Inscrire" : "Se Connecter";
         return (
-            <div className="container">
-            {view}
-
-            <Button type="button" content={whichForm} onClick={this.switchForm}/>
+            <div className = "ui middle aligned center aligned grid" >
+                <div className="column">
+                    {view}
+                    <div className="ui message">{mesaj}
+                        <span className="link" onClick={this.switchForm}> {whichForm} </span>
+                    </div>
+                </div>
             </div>
         );
     }

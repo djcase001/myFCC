@@ -3,6 +3,7 @@ import * as firebase from 'firebase';
 //import {Link} from 'react-router-dom';
 import Home from './home/home';
 import Auth from './auth/auth';
+import './App.css';
 
 const config = {
     apiKey: "AIzaSyCpVnVeaiX5Boo3Df4u8Ko7_wIOxFHaw2c",
@@ -18,7 +19,8 @@ class App extends Component {
     constructor(props){
         super(props);
         this.state = {
-            auth: false
+            auth: false,
+            errorMsg: null
         }
         this.isAuthenticated = this.isAuthenticated.bind(this);
     }
@@ -42,23 +44,34 @@ class App extends Component {
     }
 
     isAuthenticated(user, mode){
+        var vm = this;
         console.log("authed is injected", user);
         const auth = firebase.auth();
         if(mode === 'login'){
             const promise = auth.signInWithEmailAndPassword(user.email, user.password);
-            promise.catch(e => console.log(e.message));
+            promise.catch(function(e){
+                console.log(e.message);
+                vm.setState({
+                    errorMsg: e.message
+                });
+            });
         }
         if(mode === 'signup'){
             const promise = auth.createUserWithEmailAndPassword(user.email, user.password);
-            promise.catch(e => console.log(e.message));
+            promise.catch(function(e){
+                console.log(e.message);
+                vm.setState({
+                    errorMsg: e.message
+                });
+            });
         }
 
     }
 
     render() {
-        var view = this.state.auth ? <Home USER={this.state.auth} FIREBASE={firebase} /> : <Auth authed = {this.isAuthenticated} />
+        var view = this.state.auth ? <Home USER={this.state.auth} FIREBASE={firebase} /> : <Auth errMessage={this.state.errorMsg} authed = {this.isAuthenticated} />
     return (
-        <div className="container">
+        <div>
         {view}
         </div>
         );

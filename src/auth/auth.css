@@ -1,4 +1,18 @@
-.container{
-    width: 200px;
-    margin: 20px auto;
+body {
+    background-color: #DADADA;
+    padding-top: 35px;
+}
+body > .grid {
+    height: 100%;
+}
+.image {
+    margin-top: -100px;
+}
+.column {
+    max-width: 450px;
+}
+
+.link{
+    color: #2185d0;
+    cursor: pointer;
 }
