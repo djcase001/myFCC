@@ -1,6 +1,7 @@
 import React, {
     Component
 } from 'react';
+import logo from '../logo.png';
 
 
 class SignIn extends Component {
@@ -10,7 +11,11 @@ class SignIn extends Component {
     }
 
     LOGIN() {
-        this.props.login(this.emailInput.value, this.passwordInput.value, "login");
+        const user = {
+            email : this.refs.emailInput.value,
+            password : this.refs.passwordInput.value
+        }
+        this.props.login(user, "login");
     }
 
     render() {
@@ -32,7 +37,7 @@ class SignIn extends Component {
         return (
             <div>
                 <h2 className="ui teal image header">
-                    <img className="image" />
+                    <img className="image" src={logo} />
                     <div className="content">Se Connecter</div>
                 </h2>
                 <form className="ui large form">
@@ -40,13 +45,13 @@ class SignIn extends Component {
                         <div className="field" >
                             <div className="ui left icon input" >
                                 <i className="user icon" > < /i>
-                                <input type = "email"      name="email" placeholder = "E-mail address" ref = {(input) => { this.emailInput = input }} />
+                                <input type = "email" name="email" placeholder = "E-mail address" ref='emailInput' />
                             </div>
                         </div>
                         <div className="field" >
                             <div className="ui left icon input" >
                                 <i className="lock icon"> </i>
-                                <input type = "password" name="password" placeholder="Password" ref={(input) => {this.passwordInput = input}}/>
+                                <input type = "password" name="password" placeholder="Password" ref='passwordInput'/>
                             </div>
                         </div>
                         <div className="ui fluid large teal submit button" onClick={this.LOGIN} >

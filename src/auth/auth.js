@@ -23,11 +23,7 @@ class Auth extends Component {
 
     }
 
-    triggerSubmit(email, password, which){
-        const user = {
-            email: email,
-            password: password
-        }
+    triggerSubmit(user, which){
         this.props.authed(user, which);
 
     }
@@ -41,7 +37,7 @@ class Auth extends Component {
                 <div className="column">
                     {view}
                     <div className="ui message">{mesaj}
-                        <span className="link" onClick={this.switchForm}> {whichForm} </span>
+                        <span className="custom-link" onClick={this.switchForm}> {whichForm} </span>
                     </div>
                 </div>
             </div>

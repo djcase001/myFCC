@@ -12,7 +12,7 @@ body > .grid {
     max-width: 450px;
 }
 
-.link{
+.custom-link{
     color: #2185d0;
     cursor: pointer;
 }

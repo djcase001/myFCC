@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 //import { Button, Container, Header, Form, Input, Icon } from 'semantic-ui-react';
+import logo from '../logo.png';
 
 class SignUp extends Component {
     constructor(props){
@@ -8,7 +9,14 @@ class SignUp extends Component {
     }
 
     SIGNUP (){
-        this.props.signup(this.emailInputSignUp.value, this.passwordInputSignUp.value, "signup");
+
+        const user = {
+            nom : this.refs.nomInputSignUp.value,
+            prenom : this.refs.prenomInputSignUp.value,
+            email : this.refs.emailInputSignUp.value,
+            password : this.refs.passwordInputSignUp.value
+        }
+        this.props.signup(user, "signup");
     }
 
     render(){
@@ -20,7 +28,7 @@ class SignUp extends Component {
         return(
             <div>
                 <h2 className="ui teal image header">
-                    <img className="image" />
+                    <img className="image" src={logo}/>
                     <div className="content">S'Inscrire</div>
                 </h2>
                 <form className="ui large form">
@@ -28,13 +36,25 @@ class SignUp extends Component {
                         <div className="field" >
                             <div className="ui left icon input" >
                                 <i className="user icon" > < /i>
-                                <input type = "email"  name="email" placeholder = "E-mail address" ref={(input) => { this.emailInputSignUp = input }} />
+                        <input type = "text"  name="nom" placeholder="nom" ref='nomInputSignUp' />
+                            </div>
+                        </div>
+                        <div className="field" >
+                            <div className="ui left icon input" >
+                                <i className="user icon" > < /i>
+                                <input type = "text"  name="prenom" placeholder="prenom" ref='prenomInputSignUp' />
+                            </div>
+                        </div>
+                        <div className="field" >
+                            <div className="ui left icon input" >
+                                <i className="user icon" > < /i>
+                                <input type = "email"  name="email" placeholder="E-mail address" ref="emailInputSignUp" />
                             </div>
                         </div>
                         <div className="field" >
                             <div className="ui left icon input" >
                                 <i className="lock icon"> </i>
-                                <input type = "password" name="password" placeholder="Password" ref={(input) => {this.passwordInputSignUp = input}}/>
+                                <input type = "password" name="password" placeholder="Password" ref="passwordInputSignUp"/>
                             </div>
                         </div>
                         <div className="ui fluid large teal submit button" onClick={this.SIGNUP} >

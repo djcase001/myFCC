@@ -47,9 +47,14 @@ class App extends Component {
         var vm = this;
         console.log("authed is injected", user);
         const auth = firebase.auth();
+        const db = firebase.database();
         if(mode === 'login'){
-            const promise = auth.signInWithEmailAndPassword(user.email, user.password);
-            promise.catch(function(e){
+            auth.signInWithEmailAndPassword(user.email, user.password)
+                .then(
+                function(loggedUser){
+                    console.log("User has been logged in", loggedUser.uid);
+                })
+                .catch(function(e){
                 console.log(e.message);
                 vm.setState({
                     errorMsg: e.message
@@ -57,8 +62,13 @@ class App extends Component {
             });
         }
         if(mode === 'signup'){
-            const promise = auth.createUserWithEmailAndPassword(user.email, user.password);
-            promise.catch(function(e){
+            auth.createUserWithEmailAndPassword(user.email, user.password).then(
+                function(loggedUser){
+                    console.log("User has been logged in", loggedUser.uid);
+                    user.password = null;
+                    db.ref().child('users').child(loggedUser.uid).set(user);
+                })
+                .catch(function(e){
                 console.log(e.message);
                 vm.setState({
                     errorMsg: e.message
