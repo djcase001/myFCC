@@ -45,7 +45,7 @@ class App extends Component {
 
     isAuthenticated(user, mode){
         var vm = this;
-        console.log("authed is injected", user);
+//        console.log("authed is injected", user);
         const auth = firebase.auth();
         const db = firebase.database();
         if(mode === 'login'){
@@ -66,7 +66,9 @@ class App extends Component {
                 function(loggedUser){
                     console.log("User has been logged in", loggedUser.uid);
                     user.password = null;
-                    db.ref().child('users').child(loggedUser.uid).set(user);
+                    db.ref().child('users').child(loggedUser.uid).set(user).then(function(err){
+                        console.log(err, "Saved successfully");
+                    });
                 })
                 .catch(function(e){
                 console.log(e.message);
@@ -79,7 +81,7 @@ class App extends Component {
     }
 
     render() {
-        var view = this.state.auth ? <Home USER={this.state.auth} FIREBASE={firebase} /> : <Auth errMessage={this.state.errorMsg} authed = {this.isAuthenticated} />
+        var view = this.state.auth ? <Home USER={this.state.auth} userId={this.state.auth.uid} FIREBASE={firebase} /> : <Auth errMessage={this.state.errorMsg} authed = {this.isAuthenticated} />
     return (
         <div>
         {view}

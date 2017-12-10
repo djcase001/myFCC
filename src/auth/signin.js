@@ -45,7 +45,7 @@ class SignIn extends Component {
                         <div className="field" >
                             <div className="ui left icon input" >
                                 <i className="user icon" > < /i>
-                                <input type = "email" name="email" placeholder = "E-mail address" ref='emailInput' />
+                                <input type="email" name="email" placeholder = "E-mail address" ref='emailInput' />
                             </div>
                         </div>
                         <div className="field" >
