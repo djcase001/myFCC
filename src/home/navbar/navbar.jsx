@@ -76,7 +76,7 @@ class NavBar extends Component {
                     <i className="smile icon"></i>
                     Amis
                 </a>
-                <a  className="item">
+                    <a onClick={this.manageSidebar} className="item">
                     <i className="close icon"></i>
                     Fermer
                 </a>
