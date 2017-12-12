@@ -24,8 +24,29 @@ body > div#root > div > div > div > div.ui > a.item > img.custom-logo{
     margin: 0 auto 10px;
 }
 
-.app-container{
-    position: relative;
+.custom-statistic{
+    width: 95%;
+    padding: 20px 0;
+    border-radius: 4px;
+}
+
+.custom-red{
+    background-color: #B03060;
+}
+.custom-blue{
+    background-color: #0E6EB8;
+}
+.custom-violet{
+    background-color: #EE82EE;
+}
+.custom-brown{
+    background-color: #A52A2A;
+}
+.custom-purple{
+    background-color: #B413EC;
+}
+.custom-teal{
+    background-color: #008080;
 }
 
 div .custom-rail{

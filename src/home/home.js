@@ -1,10 +1,19 @@
 import React, { Component } from 'react';
 import {Link, BrowserRouter, Route} from 'react-router-dom';
+import {Line} from 'react-chartjs';
 import NavBar from './navbar/navbar.jsx';
 import './home.css';
 import logo from '../logo.png';
 import paragraph from '../paragraph.png';
 import media_paragraph from '../media-paragraph.png';
+
+const options = {"scales": {
+    "yAxes": [{
+        "ticks": {
+            "beginAtZero":true
+        }
+    }]
+}};
 
 class Home extends Component {
     constructor(props){
@@ -77,8 +86,6 @@ class Home extends Component {
         }
     }
 
-
-
     SignOut (){
         const auth = this.props.FIREBASE.auth();
         auth.signOut();
@@ -86,42 +93,79 @@ class Home extends Component {
 
     render() {
 
-        const budget = this.state.person.budgetMax ? this.state.person.budgetMax : {};
+        const budgetMax = this.state.person.budgetMax ? this.state.person.budgetMax : {};
+        const budgetMin = this.state.person.budgetMin ? this.state.person.budgetMin : {};
+        const budgetPreview = this.state.person.budgetPreview ? this.state.person.budgetPreview : {};
         return (
             <div>
             <NavBar disconnect={this.SignOut} authedUser={this.state.person}  AjouterInfos={this.addInfos} />
-                    <div className="app-container">
 
-                        <div className="ui main text container">
-                            <div className="ui statistic">
-                                <div className="value">
-                                    {budget.salaire}
+
+                    <div className="ui">
+                        <div className="ui center aligned container">
+                            <div className="ui stackable grid">
+                                <div className="four wide column">
+                                    <div className="ui statistic column custom-statistic custom-blue">
+                                        <div className="value">
+            {parseInt(budgetMax.salaire) + parseInt(budgetMax.autresRevenus)}
+                                        </div>
+                                        <div className="label">
+                                            Salaire/Mensuel
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="label">
-                                    Salaire/Mensuel
+                                <div className="four wide column padded">
+                                    <div className="ui statistic custom-statistic custom-red">
+                                        <div className="value">
+                                            {(parseInt(budgetMax.salaire) + parseInt(budgetMax.autresRevenus)) * budgetPreview[3]/100}
+                                        </div>
+                                        <div className="label">
+                                            Envies/30%
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="ui statistic">
-                                <div className="value">
-                                    {budget.salaire * 12}
+                                <div className="four wide column">
+                                    <div className="ui statistic custom-statistic custom-violet">
+                                        <div className="value">
+                                            {(parseInt(budgetMax.salaire) + parseInt(budgetMax.autresRevenus)) * budgetPreview[1]/100}
+                                        </div>
+                                        <div className="label">
+                                            Besoins/50%
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="label">
-                                    Salaire/Annuel
+                                <div className="four wide column">
+                                    <div className="ui statistic custom-statistic custom-teal">
+                                        <div className="value">
+                                            {(parseInt(budgetMax.salaire) + parseInt(budgetMax.autresRevenus)) * budgetPreview[2]/100}
+                                        </div>
+                                        <div className="label">
+                                            Epargne/20%
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+
+
+            <Line data={[50, 42, 68, 72, 58]} options={options}  width="600" height="250"/>
+
+
+
                         <div className="ui main text container">
                             <h1 className="ui header">Semantic UI Fixed Template</h1>
                             <p>This is a basic fixed menu template using fixed size containers.</p>
                             <p>A text container is used for the main container, which is useful for single column layouts</p>
 
-            <img className="wireframe" src={media_paragraph}/>
-            <img className="wireframe" src={paragraph}/>
-            <img className="wireframe" src={paragraph}/>
-            <img className="wireframe" src={paragraph}/>
-            <img className="wireframe" src={paragraph}/>
-            <img className="wireframe" src={paragraph}/>
-            <img className="wireframe" src={paragraph}/>
+                        <img className="wireframe" src={media_paragraph}/>
+                        <img className="wireframe" src={paragraph}/>
+                        <img className="wireframe" src={paragraph}/>
+                        <img className="wireframe" src={paragraph}/>
+                        <img className="wireframe" src={paragraph}/>
+                        <img className="wireframe" src={paragraph}/>
+                        <img className="wireframe" src={paragraph}/>
 
                         <div ref="ajout" className="ui tiny long modal custom-modal">
                             <div className="header">Ajouter Infos</div>
@@ -272,7 +316,6 @@ class Home extends Component {
                     </div>
                     </div>
                </div>
-        </div>
         );
     }
 }
