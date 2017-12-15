@@ -45,12 +45,9 @@ class NavBar extends Component {
 
         return (
             <div>
-            <div ref="rail" onClick={this.manageSidebar} className="ui black big launch right attached fixed button">
-                <i className="content icon"></i>
-                <span className="text">Menu</span>
-            </div>
 
-            <div   className="launch button fixed launch button custom-rail">
+
+                <div ref="rail" onClick={this.manageSidebar}  className="custom-rail">
                     <div className="ui inverted segment">
                         <i className="sidebar icon"></i>
                     </div>
