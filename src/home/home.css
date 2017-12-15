@@ -49,6 +49,25 @@ body > div#root > div > div > div > div.ui > a.item > img.custom-logo{
     background-color: #008080;
 }
 
+.custom-list{
+    width: 100%;
+}
+
+.custom-list > div.item{
+    width: 99%;
+    text-align: left;
+    font-weight: bold;
+}
+
+.custom-list > div.item > span{
+    float: right;
+    font-weight: normal;
+}
+
+div.column > div.statistic > div.custom-white{
+    color: white;
+}
+
 div .custom-rail{
     position: fixed;
     left: 0;

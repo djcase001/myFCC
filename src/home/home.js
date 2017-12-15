@@ -1,19 +1,12 @@
 import React, { Component } from 'react';
 import {Link, BrowserRouter, Route} from 'react-router-dom';
-import {Line} from 'react-chartjs';
 import NavBar from './navbar/navbar.jsx';
+import {Pie} from 'react-chartjs-2';
 import './home.css';
 import logo from '../logo.png';
 import paragraph from '../paragraph.png';
 import media_paragraph from '../media-paragraph.png';
 
-const options = {"scales": {
-    "yAxes": [{
-        "ticks": {
-            "beginAtZero":true
-        }
-    }]
-}};
 
 class Home extends Component {
     constructor(props){
@@ -21,12 +14,13 @@ class Home extends Component {
         this.SignOut = this.SignOut.bind(this);
         this.addInfos = this.addInfos.bind(this);
         this.saveBudget = this.saveBudget.bind(this);
-//        console.log(this.props.USER.email);
         this.state = {
             db: this.props.FIREBASE.database(),
-            person: ''
-        };
+            person: '',
+            chartData:{}
+        }
     }
+
 
     componentDidMount(){
         const vm = this;
@@ -35,9 +29,61 @@ class Home extends Component {
             .child(this.props.USER.uid)
             .on('value',
                 function(snap){
-            console.log(snap.val());
+            console.log(snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus - Object.values(snap.val().budgetMin).reduce((a, b) => a+b));
+            const totalDepense = Object.values(snap.val().budgetMin).reduce((a, b) => a+b);
             vm.setState({
-                person : snap.val()
+                person : snap.val(),
+                previewData: {
+                    labels: ['Envies', 'Besoins', 'Epargne'],
+                    datasets:[{
+                        label:'Budget',
+                        data:[
+                            (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview[2]/100,
+                            (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview[0]/100,
+                            (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview[1]/100],
+                        backgroundColor:[
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)']
+                    }]
+                },
+                realData: {
+                    labels: ['Epargne', 'Loyer', 'Amort Pret Banc',
+                             'Amort Autres Dettes',
+                             'Echeances/Vehic',
+                             'Depenses Dom',
+                             'Frais Scol',
+                             'Pmt Ass',
+                             'Pmt CC',
+                             'Autres Dep'],
+                    datasets:[{
+                        label:'Budget',
+                        data:[
+                            snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus - snap.val().budgetMax.impots - totalDepense,
+                            snap.val().budgetMin.loyer,
+                            snap.val().budgetMin.amortPretBanc,
+                            snap.val().budgetMin.amortAutresDettes,
+                            snap.val().budgetMin.echeancesVehicule,
+                            snap.val().budgetMin.depensesDomestiques,
+                            snap.val().budgetMin.fraisScolaires,
+                            snap.val().budgetMin.paiementAssurances,
+                            snap.val().budgetMin.paiementCC,
+                            snap.val().budgetMin.autresDepenses
+                        ],
+                        backgroundColor:[
+                            'rgba(151, 18, 75, 0.6)',
+                            'rgba(11, 64, 156, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(194, 56, 181, 0.6)',
+                            'rgba(0, 184, 192, 0.6)',
+                            'rgba(255, 199, 127, 0.6)',
+                            'rgba(176, 117, 124, 0.6)',
+                            'rgba(98, 96, 96, 0.6)',
+                            'rgba(4, 67, 67, 0.6)',
+                            'rgba(73, 190, 183, 0.6)'
+                        ]
+                    }]
+                }
             })
         });
     }
@@ -50,7 +96,7 @@ class Home extends Component {
         if(value === ''){
             return null;
         }else{
-            return value;
+            return parseInt(value);
         }
     }
 
@@ -61,9 +107,6 @@ class Home extends Component {
             "impots": this.ridOfEmpty(this.refs.impots.value),
             "autresRevenus": this.ridOfEmpty(this.refs.autresRevenus.value)};
         const budget_min = {
-            "salaire": this.ridOfEmpty(this.refs.salaireMensuel.value),
-            "impots": this.ridOfEmpty(this.refs.impots.value),
-            "autresRevenus": this.ridOfEmpty(this.refs.autresRevenus.value),
             "loyer": this.ridOfEmpty(this.refs.loyer.value),
             "amortPretBanc": this.ridOfEmpty(this.refs.amortPretBanc.value),
             "amortAutresDettes": this.ridOfEmpty(this.refs.amortAutresDettes.value),
@@ -73,7 +116,7 @@ class Home extends Component {
             "paiementAssurances": this.ridOfEmpty(this.refs.paiementAss.value),
             "paiementCC": this.ridOfEmpty(this.refs.paiementCC.value),
             "autresDepenses": this.ridOfEmpty(this.refs.autresDepenses.value)};
-        console.log(budget_max);
+
         this.state.db.ref().child("users").child(this.props.USER.uid).child('budgetMax').set(budget_max);
         this.state.db.ref().child("users").child(this.props.USER.uid).child('budgetMin').set(budget_min);
     }
@@ -96,6 +139,14 @@ class Home extends Component {
         const budgetMax = this.state.person.budgetMax ? this.state.person.budgetMax : {};
         const budgetMin = this.state.person.budgetMin ? this.state.person.budgetMin : {};
         const budgetPreview = this.state.person.budgetPreview ? this.state.person.budgetPreview : {};
+        const labels = Object.keys(budgetMin);
+        const values = Object.values(budgetMin);
+        const depenses = labels.map((val, id) => (<div className="item">{val} <span>{(values[id]).toLocaleString('fr-FR', {}) || 0}</span></div>))
+
+        const revenusLabels = Object.keys(budgetMax);
+        const revenusValues = Object.values(budgetMax);
+        const revenus = revenusLabels.map((val, id) => (<div className="item">{val} <span>{(revenusValues[id]).toLocaleString('fr-FR', {}) || 0}</span></div>))
+
         return (
             <div>
             <NavBar disconnect={this.SignOut} authedUser={this.state.person}  AjouterInfos={this.addInfos} />
@@ -103,43 +154,43 @@ class Home extends Component {
 
                     <div className="ui">
                         <div className="ui center aligned container">
-                            <div className="ui stackable grid">
-                                <div className="four wide column">
+                            <div className="ui grid">
+                                <div className="eight wide phone eight wide tablet four wide computer column">
                                     <div className="ui statistic column custom-statistic custom-blue">
-                                        <div className="value">
-            {parseInt(budgetMax.salaire) + parseInt(budgetMax.autresRevenus)}
+                                        <div className="value custom-white">
+                                            {(budgetMax.salaire + budgetMax.autresRevenus).toLocaleString('fr-FR', {})}
                                         </div>
-                                        <div className="label">
+                                        <div className="label custom-white">
                                             Salaire/Mensuel
                                         </div>
                                     </div>
                                 </div>
-                                <div className="four wide column padded">
+                                <div className="eight wide phone eight wide tablet four wide computer column padded">
                                     <div className="ui statistic custom-statistic custom-red">
-                                        <div className="value">
-                                            {(parseInt(budgetMax.salaire) + parseInt(budgetMax.autresRevenus)) * budgetPreview[3]/100}
+                                        <div className="value custom-white">
+                                            {((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview[2]/100).toLocaleString('fr-FR', {})}
                                         </div>
-                                        <div className="label">
+                                        <div className="label custom-white">
                                             Envies/30%
                                         </div>
                                     </div>
                                 </div>
-                                <div className="four wide column">
+                                <div className="eight wide phone eight wide tablet four wide computer column">
                                     <div className="ui statistic custom-statistic custom-violet">
-                                        <div className="value">
-                                            {(parseInt(budgetMax.salaire) + parseInt(budgetMax.autresRevenus)) * budgetPreview[1]/100}
+                                        <div className="value custom-white">
+                                            {((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview[0]/100).toLocaleString('fr-FR', {})}
                                         </div>
-                                        <div className="label">
+                                        <div className="label custom-white">
                                             Besoins/50%
                                         </div>
                                     </div>
                                 </div>
-                                <div className="four wide column">
+                                <div className="eight wide phone eight wide tablet four wide computer column">
                                     <div className="ui statistic custom-statistic custom-teal">
-                                        <div className="value">
-                                            {(parseInt(budgetMax.salaire) + parseInt(budgetMax.autresRevenus)) * budgetPreview[2]/100}
+                                        <div className="value custom-white">
+                                            {((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview[1]/100).toLocaleString('fr-FR', {})}
                                         </div>
-                                        <div className="label">
+                                        <div className="label custom-white">
                                             Epargne/20%
                                         </div>
                                     </div>
@@ -150,22 +201,50 @@ class Home extends Component {
 
 
 
-            <Line data={[50, 42, 68, 72, 58]} options={options}  width="600" height="250"/>
+                <div className="ui center aligned container">
+                    <div className="ui stackable grid">
+                        <div className="eight wide column">
+                            <Pie data={this.state.previewData} options={{}} />
+                        </div>
+                        <div className="eight wide column">
+                            <Pie data={this.state.realData} options={{maintainAspectRatio: true}} />
+                        </div>
+                    </div>
+                </div>
 
-
+                <div className="ui container">
+                    <div className="ui stackable grid">
+                        <div className="six wide column">
+                            <div className="ui segment">
+                                <div className="ui top attached label"><h3 className="header">Revenus</h3> </div>
+                                <div className="ui list custom-list">
+                                    {revenus}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="six wide column">
+                            <div className="ui segment">
+                                <div className="ui top attached label"><h3 className="header">Depenses</h3> </div>
+                                <div className="ui list custom-list">
+                                    {depenses}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                         <div className="ui main text container">
                             <h1 className="ui header">Semantic UI Fixed Template</h1>
                             <p>This is a basic fixed menu template using fixed size containers.</p>
                             <p>A text container is used for the main container, which is useful for single column layouts</p>
 
-                        <img className="wireframe" src={media_paragraph}/>
-                        <img className="wireframe" src={paragraph}/>
-                        <img className="wireframe" src={paragraph}/>
-                        <img className="wireframe" src={paragraph}/>
-                        <img className="wireframe" src={paragraph}/>
-                        <img className="wireframe" src={paragraph}/>
-                        <img className="wireframe" src={paragraph}/>
+                            <img className="wireframe" src={media_paragraph}/>
+                            <img className="wireframe" src={paragraph}/>
+                            <img className="wireframe" src={paragraph}/>
+                            <img className="wireframe" src={paragraph}/>
+                            <img className="wireframe" src={paragraph}/>
+                            <img className="wireframe" src={paragraph}/>
+                            <img className="wireframe" src={paragraph}/>
 
                         <div ref="ajout" className="ui tiny long modal custom-modal">
                             <div className="header">Ajouter Infos</div>
