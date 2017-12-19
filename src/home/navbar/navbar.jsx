@@ -9,13 +9,22 @@ class NavBar extends Component {
         this.SignOut = this.SignOut.bind(this);
         this.AjouterInfos = this.AjouterInfos.bind(this);
         this.manageSidebar = this.manageSidebar.bind(this);
+        this.calculateAge = this.calculateAge.bind(this);
+
         this.state = {
             sidebar: false
         };
     }
 
-    componentDidMount(){
+    componentDidMount(){}
 
+    calculateAge(){
+        let age = this.props.authedUser ? this.props.authedUser.dob : {};
+        let thisYear = new Date().getFullYear();
+
+        age = new Date(dob).getFullYear();
+        age = thisYear - age;
+        return age;
     }
 
     manageSidebar(){
@@ -24,17 +33,17 @@ class NavBar extends Component {
             sidebar: !this.state.sidebar
         }, function(){
             if(vm.state.sidebar){
-                vm.refs.sideBar.className = 'ui vertical inverted sidebar menu left icon visible' ;
+                vm.refs.sideBar.className = 'ui vertical inverted custom-sidebar sidebar menu left demo labeled icon visible' ;
                 vm.refs.rail.hidden = true;
             }else{
-                vm.refs.sideBar.className = 'ui vertical inverted sidebar menu left icon hidden' ;
+                vm.refs.sideBar.className = 'ui vertical inverted custom-sidebar sidebar menu left demo labeled icon hidden' ;
                 vm.refs.rail.hidden = false;
             }
         });
     }
 
-    AjouterInfos(){
-        this.props.AjouterInfos();
+    AjouterInfos(event){
+        this.props.AjouterInfos(event);
     }
 
     SignOut (){
@@ -53,27 +62,30 @@ class NavBar extends Component {
                     </div>
                 </div>
 
-                <div ref='sideBar' className="ui vertical inverted sidebar menu left icon">
+                <div ref='sideBar' className="ui vertical inverted sidebar custom-sidebar menu left demo labeled icon">
                 <a className="item">
                     <img className="custom-logo" src={logo} alt="logo"/>
                     SinAce
                 </a>
                 <a className="item">
-                    {this.props.authedUser.nom}
+                    <i className="user icon"></i>
+                    <div className="infos">Nom : <span>{this.props.authedUser.nom}</span></div>
+                    <div className="infos">Prenom : <span>{this.props.authedUser.prenom}</span></div>
+                    <div className="infos">Age : <span>{this.calculateAge} ans</span></div>
                 </a>
-                <a className="item">
-                    <i className="home icon"></i>
-                    Accueil
+                <a data-check="profile" onClick={this.AjouterInfos} className="item">
+                    <i data-check="profile" className="home icon"></i>
+                    Profil
                 </a>
-                <a onClick={this.AjouterInfos} className="item">
-                    <i className="plus icon"></i>
-                    Ajouter Infos
+                <a data-check="setting" onClick={this.AjouterInfos} className="item">
+                    <i data-check="setting" className="setting icon"></i>
+                    Paramètres
                 </a>
                 <a className="item">
                     <i className="smile icon"></i>
                     Amis
                 </a>
-                    <a onClick={this.manageSidebar} className="item">
+                <a onClick={this.manageSidebar} className="item">
                     <i className="close icon"></i>
                     Fermer
                 </a>

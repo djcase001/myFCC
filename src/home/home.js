@@ -14,18 +14,28 @@ class Home extends Component {
         this.SignOut = this.SignOut.bind(this);
         this.addInfos = this.addInfos.bind(this);
         this.saveBudget = this.saveBudget.bind(this);
+        this.saveProfile = this.saveProfile.bind(this);
         this.state = {
             db: this.props.FIREBASE.database(),
-            person: '',
+            person: {},
+            user: {},
             chartData:{}
         }
     }
-
 
     componentDidMount(){
         const vm = this;
         this.state.db.ref()
             .child('users')
+            .child(this.props.USER.uid)
+            .on('value',
+                function(snap){
+                    vm.setState({
+                        user: snap.val()
+                    });
+            });
+        this.state.db.ref()
+            .child('usersData')
             .child(this.props.USER.uid)
             .on('value',
                 function(snap){
@@ -38,9 +48,9 @@ class Home extends Component {
                     datasets:[{
                         label:'Budget',
                         data:[
-                            (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview[2]/100,
-                            (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview[0]/100,
-                            (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview[1]/100],
+                            (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview.envies/100,
+                            (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview.besoins/100,
+                            (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview.epargnes/100],
                         backgroundColor:[
                             'rgba(255, 99, 132, 0.6)',
                             'rgba(54, 162, 235, 0.6)',
@@ -83,6 +93,11 @@ class Home extends Component {
                             'rgba(73, 190, 183, 0.6)'
                         ]
                     }]
+                },
+                options: {
+                    legend: {
+                        display: false
+                    }
                 }
             })
         });
@@ -92,41 +107,161 @@ class Home extends Component {
 
     }
 
+    beautifyNumber(value){
+
+        return value.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
     ridOfEmpty (value){
         if(value === ''){
-            return null;
-        }else{
-            return parseInt(value);
+            return 0;
         }
+        if(isNaN(value)){
+            if(value.indexOf('.') !== -1 &&
+               value.indexOf('.') === value.lastIndexOf('.') &&
+               value.lastIndexOf('.') === value.length - 1
+              ){
+
+                return value;
+            }
+        }else{
+            return parseFloat(value);
+        }
+
     }
 
-    saveBudget(){
+    saveBudget(event){
+        event.preventDefault();
 
         const budget_max = {
-            "salaire": this.ridOfEmpty(this.refs.salaireMensuel.value),
-            "impots": this.ridOfEmpty(this.refs.impots.value),
-            "autresRevenus": this.ridOfEmpty(this.refs.autresRevenus.value)};
+            "salaire": this.ridOfEmpty(event.target[0].value),
+            "impots": this.ridOfEmpty(event.target[1].value),
+            "autresRevenus": this.ridOfEmpty(event.target[2].value)};
         const budget_min = {
-            "loyer": this.ridOfEmpty(this.refs.loyer.value),
-            "amortPretBanc": this.ridOfEmpty(this.refs.amortPretBanc.value),
-            "amortAutresDettes": this.ridOfEmpty(this.refs.amortAutresDettes.value),
-            "echeancesVehicule": this.ridOfEmpty(this.refs.echeancesVehic.value),
-            "depensesDomestiques": this.ridOfEmpty(this.refs.depensesDom.value),
-            "fraisScolaires": this.ridOfEmpty(this.refs.fraisScol.value),
-            "paiementAssurances": this.ridOfEmpty(this.refs.paiementAss.value),
-            "paiementCC": this.ridOfEmpty(this.refs.paiementCC.value),
-            "autresDepenses": this.ridOfEmpty(this.refs.autresDepenses.value)};
-
-        this.state.db.ref().child("users").child(this.props.USER.uid).child('budgetMax').set(budget_max);
-        this.state.db.ref().child("users").child(this.props.USER.uid).child('budgetMin').set(budget_min);
+            "loyer": this.ridOfEmpty(event.target[3].value),
+            "amortPretBanc": this.ridOfEmpty(event.target[4].value),
+            "amortAutresDettes": this.ridOfEmpty(event.target[5].value),
+            "echeancesVehicule": this.ridOfEmpty(event.target[6].value),
+            "depensesDomestiques": this.ridOfEmpty(event.target[7].value),
+            "fraisScolaires": this.ridOfEmpty(event.target[8].value),
+            "paiementAssurances": this.ridOfEmpty(event.target[9].value),
+            "paiementCC": this.ridOfEmpty(event.target[10].value),
+            "autresDepenses": this.ridOfEmpty(event.target[11].value)};
+        const budget_preview = {
+            "besoins": this.ridOfEmpty(event.target[12].value),
+            "envies": this.ridOfEmpty(event.target[13].value),
+            "epargnes": this.ridOfEmpty(event.target[14].value)
+        }
+        this.state.db.ref().child("usersData").child(this.props.USER.uid).child('budgetMax').set(budget_max);
+        this.state.db.ref().child("usersData").child(this.props.USER.uid).child('budgetMin').set(budget_min);
+        this.state.db.ref().child("usersData").child(this.props.USER.uid).child('budgetPreview').set(budget_preview);
+        this.state.db.ref().child("usersData").child(this.props.USER.uid).child('comptesBancaires').set(this.state.person.comptesBancaires);
     }
 
-    addInfos(){
-        if(this.refs.ajout.className.indexOf('active') !== -1){
-            this.refs.ajout.className = "ui modal custom-modal";
-        }else{
-            this.refs.ajout.className = "ui active modal custom-modal";
-        }
+    saveProfile(event){
+        event.preventDefault();
+
+        console.log(this.state.user);
+        this.state.db.ref().child("users").child(this.props.USER.uid).set(this.state.user);
+    }
+
+    addInfos(what){
+            if(what.target.dataset.check === 'profile'){
+                if(this.refs.profile.className.indexOf('active') !== -1){
+                    this.refs.profile.className = "ui modal custom-modal";
+                }else{
+                    this.refs.profile.className = "ui active modal custom-modal";
+                }
+            }else if(what.target.dataset.check === 'setting'){
+                if(this.refs.ajout.className.indexOf('active') !== -1){
+                    this.refs.ajout.className = "ui modal custom-modal";
+                }else{
+                    this.refs.ajout.className = "ui active modal custom-modal";
+                }
+            }else{
+                this.refs.ajout.className = "ui modal custom-modal";
+                this.refs.profile.className = "ui modal custom-modal";
+            }
+    }
+
+    addAccount(){
+
+        const accInfos = {
+            nomBanque: this.refs.nomBanque.value,
+            noCompte: this.refs.noCompte.value,
+            balanceCompte: this.ridOfEmpty(this.refs.balanceCompte.value)
+        };
+        this.state.db.ref().child("users").child(this.props.USER.uid).child("data").child('comptesBancaires').push(accInfos);
+    }
+
+    handleAccounts (e){
+        let comptesBancaires = this.state.person.comptesBancaires;
+        let vm = this;
+        const comptesValues = Object.values(comptesBancaires);
+        const comptesKeys = Object.keys(comptesBancaires);
+
+
+        let finalArr = comptesValues.map(function(val, id){
+            if(e.target.placeholder === "Nom de la banque" && (comptesKeys[id] ===  e.target.dataset.key)){
+
+                comptesBancaires[e.target.dataset.key].nomBanque = e.target.value;
+                comptesBancaires[e.target.dataset.key].noCompte = val.noCompte;
+                comptesBancaires[e.target.dataset.key].balanceCompte = vm.ridOfEmpty(val.balanceCompte);
+            }else if(e.target.placeholder === "Numero du compte" && (comptesKeys[id] ===  e.target.dataset.key)){
+                comptesBancaires[e.target.dataset.key].nomBanque = val.nomBanque;
+                comptesBancaires[e.target.dataset.key].noCompte = e.target.value;
+                comptesBancaires[e.target.dataset.key].balanceCompte = vm.ridOfEmpty(val.balanceCompte);
+            }else if(e.target.placeholder === "Balance du compte" && (comptesKeys[id] ===  e.target.dataset.key)){
+                comptesBancaires[e.target.dataset.key].nomBanque = val.nomBanque;
+                comptesBancaires[e.target.dataset.key].noCompte = val.noCompte;
+                comptesBancaires[e.target.dataset.key].balanceCompte = vm.ridOfEmpty(e.target.value);
+            }
+        });
+
+
+        return comptesBancaires;
+
+    }
+
+    onChangeHandleProfile(e){
+        this.setState({
+            user: {
+                nom: e.target.form[0].value,
+                prenom: e.target.form[1].value,
+                dob: e.target.form[2].value
+            }
+        });
+    }
+
+    onChangeHandle(e){
+        console.dir(e.target);
+
+            let comptesBancaires = this.handleAccounts(e);
+            this.setState({
+                person: {budgetMax :{
+                            salaire: this.ridOfEmpty(e.target.form[0].value),
+                            impots: this.ridOfEmpty(e.target.form[1].value),
+                            autresRevenus: this.ridOfEmpty(e.target.form[2].value)
+                        },
+                        budgetMin : {
+                            loyer : this.ridOfEmpty(e.target.form[3].value),
+                            amortPretBanc : this.ridOfEmpty(e.target.form[4].value),
+                            amortAutresDettes: this.ridOfEmpty(e.target.form[5].value),
+                            echeancesVehicule:this.ridOfEmpty(e.target.form[6].value),
+                            depensesDomestiques:this.ridOfEmpty(e.target.form[7].value),
+                            fraisScolaires:this.ridOfEmpty(e.target.form[8].value),
+                            paiementAssurances:this.ridOfEmpty(e.target.form[9].value),
+                            paiementCC:this.ridOfEmpty(e.target.form[10].value),
+                            autresDepenses:this.ridOfEmpty(e.target.form[11].value)
+                        },
+                        budgetPreview : {
+                            besoins: this.ridOfEmpty(e.target.form[12].value),
+                            envies: this.ridOfEmpty(e.target.form[13].value),
+                            epargnes: this.ridOfEmpty(e.target.form[14].value)
+                        },
+                        comptesBancaires
+                }
+            });
     }
 
     SignOut (){
@@ -136,20 +271,48 @@ class Home extends Component {
 
     render() {
 
+        const user = this.state.user ? this.state.user : {};
+
         const budgetMax = this.state.person.budgetMax ? this.state.person.budgetMax : {};
         const budgetMin = this.state.person.budgetMin ? this.state.person.budgetMin : {};
         const budgetPreview = this.state.person.budgetPreview ? this.state.person.budgetPreview : {};
-        const labels = Object.keys(budgetMin);
-        const values = Object.values(budgetMin);
-        const depenses = labels.map((val, id) => (<div className="item">{val} <span>{(values[id]).toLocaleString('fr-FR', {}) || 0}</span></div>))
+
+        const depensesLabels = Object.keys(budgetMin);
+        const depensesValues = Object.values(budgetMin);
+        let   totalDepenses = (depensesValues.length !== 0) ? depensesValues.reduce(function(a, b){
+            return a + b;
+        }) : [0, 0];
+        const depenses = depensesLabels.map((val, id) => (<div className="item" key={id}>{val} <span>{this.beautifyNumber(depensesValues[id]) || 0}</span></div>))
 
         const revenusLabels = Object.keys(budgetMax);
         const revenusValues = Object.values(budgetMax);
-        const revenus = revenusLabels.map((val, id) => (<div className="item">{val} <span>{(revenusValues[id]).toLocaleString('fr-FR', {}) || 0}</span></div>))
+        let   totalRevenus = budgetMax.salaire - budgetMax.impots + budgetMax.autresRevenus;
+        const revenus = revenusLabels.map((val, id) => (<div className="item" key={id}>{val} <span>{this.beautifyNumber(revenusValues[id]) || 0}</span></div>));
+
+        const accounts = this.state.person.comptesBancaires ? this.state.person.comptesBancaires : {};
+        const accArr = Object.values(accounts);
+        const keysArr = Object.keys(accounts);
+        const account = accArr.map(function(val, id){
+            return (<div className="fields">
+                    <div className="field" key={id}>
+                                <label>{val.nomBanque}</label>
+                                <input type="text" data-no={id}  data-key={keysArr[id]} value={val.nomBanque} placeholder="Nom de la banque" />
+                            </div>
+                            <div className="field">
+                                <label>{val.noCompte}</label>
+                                <input type="text" data-no={id} data-key={keysArr[id]} value={val.noCompte} placeholder="Numero du compte" />
+                            </div>
+                            <div className="field">
+                                <label>{val.balanceCompte}</label>
+                                <input type="text" data-no={id} data-key={keysArr[id]} value={val.balanceCompte} placeholder="balance du compte" />
+                            </div>
+                        </div>);
+        });
+
 
         return (
             <div>
-            <NavBar disconnect={this.SignOut} authedUser={this.state.person}  AjouterInfos={this.addInfos} />
+                <NavBar disconnect={this.SignOut} authedUser={this.state.user}  AjouterInfos={this.addInfos} />
 
 
                     <div className="ui">
@@ -158,7 +321,7 @@ class Home extends Component {
                                 <div className="eight wide phone eight wide tablet four wide computer column">
                                     <div className="ui statistic column custom-statistic custom-blue">
                                         <div className="value custom-white">
-                                            {(budgetMax.salaire + budgetMax.autresRevenus).toLocaleString('fr-FR', {})}
+                                            {this.beautifyNumber(budgetMax.salaire - budgetMax.impots + budgetMax.autresRevenus)}
                                         </div>
                                         <div className="label custom-white">
                                             Salaire/Mensuel
@@ -168,7 +331,7 @@ class Home extends Component {
                                 <div className="eight wide phone eight wide tablet four wide computer column padded">
                                     <div className="ui statistic custom-statistic custom-red">
                                         <div className="value custom-white">
-                                            {((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview[2]/100).toLocaleString('fr-FR', {})}
+                                            {this.beautifyNumber((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview.envies/100)}
                                         </div>
                                         <div className="label custom-white">
                                             Envies/30%
@@ -178,7 +341,7 @@ class Home extends Component {
                                 <div className="eight wide phone eight wide tablet four wide computer column">
                                     <div className="ui statistic custom-statistic custom-violet">
                                         <div className="value custom-white">
-                                            {((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview[0]/100).toLocaleString('fr-FR', {})}
+                                            {this.beautifyNumber((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview.besoins/100)}
                                         </div>
                                         <div className="label custom-white">
                                             Besoins/50%
@@ -188,7 +351,7 @@ class Home extends Component {
                                 <div className="eight wide phone eight wide tablet four wide computer column">
                                     <div className="ui statistic custom-statistic custom-teal">
                                         <div className="value custom-white">
-                                            {((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview[1]/100).toLocaleString('fr-FR', {})}
+                                            {this.beautifyNumber((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview.epargnes/100)}
                                         </div>
                                         <div className="label custom-white">
                                             Epargne/20%
@@ -203,11 +366,17 @@ class Home extends Component {
 
                 <div className="ui center aligned container">
                     <div className="ui stackable grid">
-                        <div className="eight wide column">
-                            <Pie data={this.state.previewData} options={{}} />
+                        <div className="six wide column">
+                            <div className="ui segment">
+                                <div className="ui top attached custom-label"><h3 className="header">Dépenses Prévisionnelles</h3> </div>
+                                <Pie data={this.state.previewData} options={this.state.options} />
+                            </div>
                         </div>
-                        <div className="eight wide column">
-                            <Pie data={this.state.realData} options={{maintainAspectRatio: true}} />
+                        <div className="six wide column">
+                            <div className="ui segment">
+                                <div className="ui top attached custom-label"><h3 className="header">Dépenses Réelles</h3></div>
+                                <Pie data={this.state.realData} options={this.state.options} />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -217,36 +386,25 @@ class Home extends Component {
                         <div className="six wide column">
                             <div className="ui segment">
                                 <div className="ui top attached label"><h3 className="header">Revenus</h3> </div>
-                                <div className="ui list custom-list">
+                                <div className="ui list divided custom-list">
                                     {revenus}
+                                    <div className="item">Revenu Net<span>{this.beautifyNumber(totalRevenus) || 0}</span></div>
                                 </div>
                             </div>
                         </div>
                         <div className="six wide column">
                             <div className="ui segment">
-                                <div className="ui top attached label"><h3 className="header">Depenses</h3> </div>
-                                <div className="ui list custom-list">
+                                <div className="ui top attached label"><h3 className="header">Dépenses</h3> </div>
+                                <div className="ui list divided custom-list">
                                     {depenses}
+                                    <div className="item">Total Dépenses<span>{this.beautifyNumber(totalDepenses) || 0}</span></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                        <div className="ui main text container">
-                            <h1 className="ui header">Semantic UI Fixed Template</h1>
-                            <p>This is a basic fixed menu template using fixed size containers.</p>
-                            <p>A text container is used for the main container, which is useful for single column layouts</p>
-
-                            <img className="wireframe" src={media_paragraph}/>
-                            <img className="wireframe" src={paragraph}/>
-                            <img className="wireframe" src={paragraph}/>
-                            <img className="wireframe" src={paragraph}/>
-                            <img className="wireframe" src={paragraph}/>
-                            <img className="wireframe" src={paragraph}/>
-                            <img className="wireframe" src={paragraph}/>
-
-                        <div ref="ajout" className="ui tiny long modal custom-modal">
+                <div ref="ajout" className="ui tiny long modal custom-modal">
                             <div className="header">Ajouter Infos</div>
 
                             <div className="image content">
@@ -255,145 +413,171 @@ class Home extends Component {
                                     <p>Formulaire de budget familial</p>
                                 </div>
                             </div>
-                            <div onClick={this.addInfos} className="custom-window-close">
-                                <i className="window close icon"></i>
+                            <div data-check="close" onClick={this.addInfos} className="custom-window-close">
+                                <i data-check="close" className="window close icon"></i>
                             </div>
                             <div className="scrolling scroll-content content">
                                 <div className="ui inverted segment">
-                                <div className="ui inverted large form">
-
+                                    <div className="ui inverted large equal width form">
+                                <form data-check="profile" onSubmit={this.saveBudget} onChange={(event)=> this.onChangeHandle(event)}>
                                     <div className="fields">
                                         <div className="field">
                                             <label>Salaire Mensuel</label>
-                                            <input type="text" placeholder="Salaire Mensuel" ref="salaireMensuel"/>
+                                            <input type="text" value={budgetMax.salaire}  placeholder="Salaire Mensuel" />
                                         </div>
-                                    </div>
-                                    <div className="fields">
+
                                         <div className="field">
                                             <label>Impots</label>
-                                            <input type="text" placeholder="Impots" ref="impots"/>
+                                            <input type="text" value={budgetMax.impots} placeholder="Impots" />
                                         </div>
-                                    </div>
-                                    <div className="fields">
+
                                         <div className="field">
                                             <label>Autres Revenus</label>
-                                            <input type="text" placeholder="Autres Revenus" ref="autresRevenus"/>
+                                            <input type="text" value={budgetMax.autresRevenus} placeholder="Autres Revenus" />
                                         </div>
                                     </div>
+
                                     <div className="ui divider"></div>
 
                                     <div className="fields">
                                         <div className="field">
                                             <label>Loyer</label>
-                                            <input type="text" placeholder="Loyer" ref="loyer"/>
+                                            <input type="text" value={budgetMin.loyer} placeholder="Loyer" />
                                         </div>
-                                    </div>
-                                    <div className="fields">
+
                                         <div className="field">
                                             <label>Amortissement pret bancaire</label>
-                                            <input type="text" placeholder="Amortissement pret bancaire" ref="amortPretBanc" />
+                                            <input type="text" value={budgetMin.amortPretBanc} placeholder="Amortissement pret bancaire" />
                                         </div>
-                                    </div>
-                                    <div className="fields">
+
                                         <div className="field">
                                             <label>Amortissement autres dettes</label>
-                                            <input type="text" placeholder="Amortissement autres dettes" ref="amortAutresDettes" />
+                                            <input type="text" value={budgetMin.amortAutresDettes} placeholder="Amortissement autres dettes" />
                                         </div>
                                     </div>
-
                                     <div className="fields">
                                         <div className="field">
                                             <label>Echeances/Vehicules</label>
-                                            <input type="text" placeholder="Echeances/Vehicules" ref="echeancesVehic"/>
+                                            <input type="text" value={budgetMin.echeancesVehicule} placeholder="Echeances/Vehicules"/>
                                         </div>
-                                    </div>
-                                    <div className="fields">
+
                                         <div className="field">
                                             <label>Depenses domestiques</label>
-                                            <input type="text" placeholder="Depenses domestiques" ref="depensesDom"/>
+                                            <input type="text" value={budgetMin.depensesDomestiques} placeholder="Depenses domestiques"/>
                                         </div>
-                                    </div>
-                                    <div className="fields">
+
                                         <div className="field">
                                             <label>Frais Scolaire</label>
-                                            <input type="text" placeholder="Frais Scolaire" ref="fraisScol"/>
+                                            <input type="text" value={budgetMin.fraisScolaires} placeholder="Frais Scolaire"/>
                                         </div>
-                                    </div><div className="fields">
+                                    </div>
+                                    <div className="fields">
                                         <div className="field">
                                             <label>Paiement assurances</label>
-                                            <input type="text" placeholder="Paiement assurances" ref="paiementAss" />
+                                            <input type="text" value={budgetMin.paiementAssurances} placeholder="Paiement assurances" />
                                         </div>
-                                    </div>
-                                    <div className="fields">
+
                                         <div className="field">
                                             <label>Paiement carte de credit</label>
-                                            <input type="text" placeholder="Paiement carte de credit" ref="paiementCC" />
+                                            <input type="text" value={budgetMin.paiementCC} placeholder="Paiement carte de credit" />
                                         </div>
-                                    </div>
-                                    <div className="fields">
                                         <div className="field">
                                             <label>Autres Depenses</label>
-                                            <input type="text" placeholder="Autres Depenses" ref="autresDepenses" />
+                                            <input type="text" value={budgetMin.autresDepenses} placeholder="Autres Depenses" />
                                         </div>
                                     </div>
 
-                                    <button onClick={this.saveBudget} className="ui button" type="submit">Sauvegarder</button>
+                                    <div className="ui divider"></div>
 
+                                    <div className="fields">
+                                        <div className="field">
+                                            <label>% Besoins</label>
+                                            <input type="text" value={budgetPreview.besoins} placeholder="% Besoins" />
+                                        </div>
+
+                                        <div className="field">
+                                            <label>% Envies</label>
+                                            <input type="text" value={budgetPreview.envies} placeholder="% Envies" />
+                                        </div>
+                                        <div className="field">
+                                            <label>% Epargne</label>
+                                            <input type="text" value={budgetPreview.epargnes} placeholder="% Epargne"  />
+                                        </div>
+                                    </div>
+
+                                    <div className="ui divider"></div>
+                                    {account}
+                                    <div className="fields">
+                                        <div className="field">
+                                            <label>Nom de la banque</label>
+                                            <input type="text" ref="nomBanque" placeholder="Nom de la banque" />
+                                        </div>
+
+                                        <div className="field">
+                                            <label>Numero du compte</label>
+                                            <input type="text" ref="noCompte" placeholder="Numero du compte" />
+                                        </div>
+
+                                        <div className="field">
+                                            <label>Balance</label>
+                                            <input type="text" ref="balanceCompte"  placeholder="Balance du compte" />
+                                        </div>
+                                        <button className="ui button" onClick={this.addAccount.bind(this)} type="button">+</button>
+                                    </div>
+
+
+
+
+                                    <button className="ui button" type="submit">Sauvegarder</button>
+                            </form>
                                 </div>
                                 </div>
                             </div>
                         </div>
 
+                <div ref="profile" className="ui tiny long modal custom-modal">
+                    <div className="header">Infos Profile</div>
+
+                    <div className="image content">
+                        <img src={logo} className="image custom-image"/>
+                        <div className="description">
+                            <p>Gestion des infos du profile</p>
                         </div>
+                    </div>
+                    <div data-check="close" onClick={this.addInfos} className="custom-window-close">
+                        <i data-check="close" className="window close icon"></i>
+                    </div>
+                    <div className="scrolling scroll-content content">
+                        <div className="ui inverted segment">
+                            <div className="ui inverted large equal width form">
+                                <form data-check="profile" onSubmit={this.saveProfile} onChange={(event)=> this.onChangeHandleProfile(event)}>
+                                    <div className="fields">
+                                        <div className="field">
+                                            <label>Nom</label>
+                                            <input type="text" value={user.nom}  placeholder="Nom" />
+                                        </div>
 
+                                        <div className="field">
+                                            <label>Prenom</label>
+                                            <input type="text" value={user.prenom} placeholder="Prenom" />
+                                        </div>
 
-
-
-                    <div className="ui inverted vertical footer segment">
-                        <div className="ui center aligned container">
-                            <div className="ui stackable inverted divided grid">
-                                <div className="three wide column">
-                                    <h4 className="ui inverted header">Group 1</h4>
-                                    <div className="ui inverted link list">
-                                        <a href="#" className="item">Link One</a>
-                                        <a href="#" className="item">Link Two</a>
-                                        <a href="#" className="item">Link Three</a>
-                                        <a href="#" className="item">Link Four</a>
+                                        <div className="field">
+                                            <label>Date de Naissance</label>
+                                            <input type="date" value={user.dob} placeholder="Date de Naissance" />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="three wide column">
-                                    <h4 className="ui inverted header">Group 2</h4>
-                                    <div className="ui inverted link list">
-                                        <a href="#" className="item">Link One</a>
-                                        <a href="#" className="item">Link Two</a>
-                                        <a href="#" className="item">Link Three</a>
-                                        <a href="#" className="item">Link Four</a>
-                                    </div>
-                                </div>
-                                <div className="three wide column">
-                                    <h4 className="ui inverted header">Group 3</h4>
-                                    <div className="ui inverted link list">
-                                        <a href="#" className="item">Link One</a>
-                                        <a href="#" className="item">Link Two</a>
-                                        <a href="#" className="item">Link Three</a>
-                                        <a href="#" className="item">Link Four</a>
-                                    </div>
-                                </div>
-                                <div className="seven wide column">
-                                    <h4 className="ui inverted header">Footer Header</h4>
-                                        <p>Extra space for a call to action inside the footer that could help re-engage users.</p>
-                                </div>
+                                    <button className="ui button" type="submit">Sauvegarder</button>
+                                </form>
                             </div>
-                        <div className="ui inverted section divider"></div>
-                        <img src={logo} className="ui centered mini image"/>
-                        <div className="ui horizontal inverted small divided link list">
-                            <a className="item" href="#">Site Map</a>
-                            <a className="item" href="#">Contact Us</a>
-                            <a className="item" href="#">Terms and Conditions</a>
-                            <a className="item" href="#">Privacy Policy</a>
                         </div>
                     </div>
-                    </div>
+                </div>
+
+
+
+
+
                </div>
         );
     }

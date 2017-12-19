@@ -30,6 +30,10 @@ body > div#root > div > div > div > div.ui > a.item > img.custom-logo{
     border-radius: 4px;
 }
 
+.custom-label{
+    margin-bottom: 15px;
+}
+
 .custom-red{
     background-color: #B03060;
 }
@@ -64,6 +68,11 @@ body > div#root > div > div > div > div.ui > a.item > img.custom-logo{
     font-weight: normal;
 }
 
+.ui.statistic > .value,
+.ui.statistics .statistic > .value{
+    font-size: 2rem !important;
+}
+
 div.column > div.statistic > div.custom-white{
     color: white;
 }
@@ -96,8 +105,7 @@ div > .launch.button {
 }
 
 .ui.modal.custom-modal{
-    top: 150px;
-    width: 350px;
+    top: 110px;
 }
 
 .scroll-content{
@@ -119,4 +127,20 @@ div > .launch.button {
     top: 0px;
     right: 10px;
     cursor: pointer;
+}
+
+/* NavBar */
+div.ui.left.demo.custom-sidebar{
+    width: 260px;
+}
+
+div.infos{
+    margin-bottom: 5px;
+    padding-right: 60px;
+    text-align: left;
+}
+
+div.infos span{
+    float: right;
+    font-weight: bold;
 }
