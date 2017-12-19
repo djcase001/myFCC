@@ -22,7 +22,7 @@ class NavBar extends Component {
         let age = this.props.authedUser ? this.props.authedUser.dob : {};
         let thisYear = new Date().getFullYear();
 
-        age = new Date(dob).getFullYear();
+        age = new Date(age).getFullYear();
         age = thisYear - age;
         return age;
     }
