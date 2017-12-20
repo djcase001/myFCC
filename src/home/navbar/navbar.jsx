@@ -71,7 +71,7 @@ class NavBar extends Component {
                     <i className="user icon"></i>
                     <div className="infos">Nom : <span>{this.props.authedUser.nom}</span></div>
                     <div className="infos">Prenom : <span>{this.props.authedUser.prenom}</span></div>
-                    <div className="infos">Age : <span>{this.calculateAge} ans</span></div>
+                    <div className="infos">Age : <span>{new Date().getFullYear() - new Date(this.props.authedUser.dob).getFullYear()} ans</span></div>
                 </a>
                 <a data-check="profile" onClick={this.AjouterInfos} className="item">
                     <i data-check="profile" className="home icon"></i>

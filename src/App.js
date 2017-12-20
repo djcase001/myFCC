@@ -1,9 +1,23 @@
 import React, { Component } from 'react';
+import {
+    BrowserRouter as Router,
+    Route,
+    Link,
+    Redirect,
+    withRouter
+} from 'react-router-dom';
+
 import * as firebase from 'firebase';
-//import {Link} from 'react-router-dom';
-import Home from './home/home';
+
 import Auth from './auth/auth';
+import Home from './home/home';
 import './App.css';
+
+////////////////////////////////////////////////////////////
+// 1. Click the public page
+// 2. Click the protected page
+// 3. Log in
+// 4. Click the back button, note the URL each time
 
 const config = {
     apiKey: "AIzaSyCpVnVeaiX5Boo3Df4u8Ko7_wIOxFHaw2c",
@@ -15,37 +29,97 @@ const config = {
 };
 firebase.initializeApp(config);
 
+const auth = {
+    isAuthenticated: false
+}
+
+const PrivateRoute = ({ component: Component, ...rest }) => (
+    <Route {...rest} render={props => (
+            auth.isAuthenticated ?
+            (<Component {...props}/>)
+            :
+            (<Redirect to={{pathname: '/',  state: { from: props.location } }}/>)
+        )}/>
+)
+
+let User = null;
+
+firebase.auth().onAuthStateChanged(function(user){
+    if(user){
+        auth.isAuthenticated = true;
+        User = user;
+    }else{
+        console.log("firebase message : Not logged in");
+        auth.isAuthenticated = false;
+        User = null;
+    }
+});
+
+
+const Protected = () => (<Home USER={User} userId={User.uid} FIREBASE={firebase} />)
+
 class App extends Component {
     constructor(props){
         super(props);
-        this.state = {
-            auth: false,
-            errorMsg: null
-        }
-        this.isAuthenticated = this.isAuthenticated.bind(this);
+        this.state = {}
     }
 
+
+
     componentDidMount(){
-        const vm = this;
-        const auth = firebase.auth();
-        auth.onAuthStateChanged(function(user){
+
+        firebase.auth().onAuthStateChanged(function(user){
             if(user){
-                console.log(user, 'user is logged in');
-                vm.setState({
-                    auth: user
-                });
+                auth.isAuthenticated = true;
             }else{
                 console.log("Not logged in");
-                vm.setState({
-                    auth: false
-                });
+                auth.isAuthenticated = false;
             }
         });
     }
 
-    isAuthenticated(user, mode){
+
+    render (){
+
+
+        return (<Router>
+                    <div>
+                        <Route path="/" component={Login}/>
+                        <PrivateRoute path="/protected" component={Protected}/>
+                    </div>
+                </Router>);
+    }
+}
+
+class Login extends Component {
+    constructor(props){
+        super(props);
+        this.authenticate = this.authenticate.bind(this);
+        this.state = {
+            errorMsg: null,
+            redirectToReferrer: false
+        }
+    }
+
+    componentWillMount(){
+        let vm = this;
+        firebase.auth().onAuthStateChanged(function(user){
+            if(user){
+                auth.isAuthenticated = true;
+                vm.setState({
+                    redirectToReferrer: true
+                })
+            }else{
+                auth.isAuthenticated = false;
+                vm.setState({
+                    redirectToReferrer: false
+                })
+            }
+        });
+    }
+
+    authenticate(user, mode){
         var vm = this;
-//        console.log("authed is injected", user);
         const auth = firebase.auth();
         const db = firebase.database();
         if(mode === 'login'){
@@ -81,13 +155,23 @@ class App extends Component {
     }
 
     render() {
-        var view = this.state.auth ? <Home USER={this.state.auth} userId={this.state.auth.uid} FIREBASE={firebase} /> : <Auth errMessage={this.state.errorMsg} authed = {this.isAuthenticated} />
-    return (
-        <div>
-        {view}
-        </div>
-        );
-  }
+
+        const { from } = this.props.location.state || { from: { pathname: '/protected' } }
+        const { redirectToReferrer } = this.state;
+
+        if (redirectToReferrer) {
+            return (
+                <Redirect to={{ pathname: '/protected' }}/>
+            )
+        }
+        console.log('Render', redirectToReferrer);
+        return (
+            <div>
+                <Redirect to={{ pathname: '/' }}/>
+                <Auth errMessage={this.state.errorMsg} authed = {this.authenticate} />
+            </div>
+        )
+    }
 }
 
-export default App;
+export default App

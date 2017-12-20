@@ -228,7 +228,8 @@ class Home extends Component {
             user: {
                 nom: e.target.form[0].value,
                 prenom: e.target.form[1].value,
-                dob: e.target.form[2].value
+                dob: e.target.form[2].value,
+                email: e.target.form[3].value
             }
         });
     }
@@ -565,6 +566,10 @@ class Home extends Component {
                                         <div className="field">
                                             <label>Date de Naissance</label>
                                             <input type="date" value={user.dob} placeholder="Date de Naissance" />
+                                        </div>
+                                        <div className="field">
+                                            <label>adresse email</label>
+                                            <input type="text" value={user.email} placeholder="email" />
                                         </div>
                                     </div>
                                     <button className="ui button" type="submit">Sauvegarder</button>
