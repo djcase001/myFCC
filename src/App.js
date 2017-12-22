@@ -11,13 +11,6 @@ import * as firebase from 'firebase';
 
 import Auth from './auth/auth';
 import Home from './home/home';
-import './App.css';
-
-////////////////////////////////////////////////////////////
-// 1. Click the public page
-// 2. Click the protected page
-// 3. Log in
-// 4. Click the back button, note the URL each time
 
 const config = {
     apiKey: "AIzaSyCpVnVeaiX5Boo3Df4u8Ko7_wIOxFHaw2c",
@@ -64,20 +57,15 @@ class App extends Component {
         this.state = {}
     }
 
-
-
     componentDidMount(){
-
         firebase.auth().onAuthStateChanged(function(user){
             if(user){
                 auth.isAuthenticated = true;
             }else{
-                console.log("Not logged in");
                 auth.isAuthenticated = false;
             }
         });
     }
-
 
     render (){
 
@@ -85,7 +73,7 @@ class App extends Component {
         return (<Router>
                     <div>
                         <Route path="/" component={Login}/>
-                        <PrivateRoute path="/protected" component={Protected}/>
+                        <PrivateRoute path="/accueil" component={Protected}/>
                     </div>
                 </Router>);
     }
@@ -156,15 +144,15 @@ class Login extends Component {
 
     render() {
 
-        const { from } = this.props.location.state || { from: { pathname: '/protected' } }
+        const { from } = this.props.location.state || { from: { pathname: '/accueil' } }
         const { redirectToReferrer } = this.state;
 
         if (redirectToReferrer) {
             return (
-                <Redirect to={{ pathname: '/protected' }}/>
+                <Redirect to={{ pathname: '/accueil' }}/>
             )
         }
-        console.log('Render', redirectToReferrer);
+
         return (
             <div>
                 <Redirect to={{ pathname: '/' }}/>

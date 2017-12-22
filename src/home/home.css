@@ -1,5 +1,5 @@
 body {
-    background-color: #FFFFFF;
+    background-color: #DADADA;
 }
 .ui.menu .item img.logo {
     margin-right: 1.5em;
@@ -30,8 +30,8 @@ body > div#root > div > div > div > div.ui > a.item > img.custom-logo{
     border-radius: 4px;
 }
 
-.custom-label{
-    margin-bottom: 15px;
+.segment.custom-segment{
+    padding-top: 50px;
 }
 
 .custom-red{

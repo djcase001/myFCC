@@ -4,8 +4,7 @@ import NavBar from './navbar/navbar.jsx';
 import {Pie} from 'react-chartjs-2';
 import './home.css';
 import logo from '../logo.png';
-import paragraph from '../paragraph.png';
-import media_paragraph from '../media-paragraph.png';
+import Quotes from '../quotes/quotes';
 
 
 class Home extends Component {
@@ -15,6 +14,8 @@ class Home extends Component {
         this.addInfos = this.addInfos.bind(this);
         this.saveBudget = this.saveBudget.bind(this);
         this.saveProfile = this.saveProfile.bind(this);
+        this.beautifyNumber = this.beautifyNumber.bind(this);
+        this.manageColor = this.manageColor.bind(this);
         this.state = {
             db: this.props.FIREBASE.database(),
             person: {},
@@ -50,7 +51,7 @@ class Home extends Component {
                         data:[
                             (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview.envies/100,
                             (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview.besoins/100,
-                            (snap.val().budgetMax.salaire + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview.epargnes/100],
+                            (snap.val().budgetMax.salaire - snap.val().budgetMax.impots + snap.val().budgetMax.autresRevenus) * snap.val().budgetPreview.epargnes/100],
                         backgroundColor:[
                             'rgba(255, 99, 132, 0.6)',
                             'rgba(54, 162, 235, 0.6)',
@@ -150,12 +151,40 @@ class Home extends Component {
         const budget_preview = {
             "besoins": this.ridOfEmpty(event.target[12].value),
             "envies": this.ridOfEmpty(event.target[13].value),
-            "epargnes": this.ridOfEmpty(event.target[14].value)
+            "epargnes": this.ridOfEmpty(event.target[14].value),
+            "securite": this.ridOfEmpty(event.target[15].value)
         }
         this.state.db.ref().child("usersData").child(this.props.USER.uid).child('budgetMax').set(budget_max);
         this.state.db.ref().child("usersData").child(this.props.USER.uid).child('budgetMin').set(budget_min);
         this.state.db.ref().child("usersData").child(this.props.USER.uid).child('budgetPreview').set(budget_preview);
         this.state.db.ref().child("usersData").child(this.props.USER.uid).child('comptesBancaires').set(this.state.person.comptesBancaires);
+    }
+
+    manageColor(value){
+        //        red #d95c5c
+        //        yellow 30% #efbc72
+        //        yellow 40% #e6bb48
+        //        yellow 50% #e6bb48
+        //        yellow 60% #ddc928
+        //        green 70% #b4d95c
+        //        green 90% #66da81
+        if(value < .3){
+            return '#d95c5c';
+        }else if(value >= .3 && value < .4){
+            return '#efbc72';
+        }else if(value >= .4 && value < .5){
+            return '#e6bb48';
+        }else if(value >= .5 && value < .6){
+            return '#e6bb48';
+        }else if(value >= .6 && value < .7){
+            return '#ddc928';
+        }else if(value >= .7 && value < .8){
+            return '#b4d95c';
+        }else if(value >= .8 && value < .9){
+            return '#66da81';
+        }else{
+            return '#66da81';
+        }
     }
 
     saveProfile(event){
@@ -202,16 +231,19 @@ class Home extends Component {
 
 
         let finalArr = comptesValues.map(function(val, id){
+//            console.log(e.target.value, e.target.placeholder, comptesKeys[id], e.target.dataset.key);
             if(e.target.placeholder === "Nom de la banque" && (comptesKeys[id] ===  e.target.dataset.key)){
 
                 comptesBancaires[e.target.dataset.key].nomBanque = e.target.value;
                 comptesBancaires[e.target.dataset.key].noCompte = val.noCompte;
                 comptesBancaires[e.target.dataset.key].balanceCompte = vm.ridOfEmpty(val.balanceCompte);
             }else if(e.target.placeholder === "Numero du compte" && (comptesKeys[id] ===  e.target.dataset.key)){
+
                 comptesBancaires[e.target.dataset.key].nomBanque = val.nomBanque;
                 comptesBancaires[e.target.dataset.key].noCompte = e.target.value;
                 comptesBancaires[e.target.dataset.key].balanceCompte = vm.ridOfEmpty(val.balanceCompte);
             }else if(e.target.placeholder === "Balance du compte" && (comptesKeys[id] ===  e.target.dataset.key)){
+
                 comptesBancaires[e.target.dataset.key].nomBanque = val.nomBanque;
                 comptesBancaires[e.target.dataset.key].noCompte = val.noCompte;
                 comptesBancaires[e.target.dataset.key].balanceCompte = vm.ridOfEmpty(e.target.value);
@@ -235,9 +267,9 @@ class Home extends Component {
     }
 
     onChangeHandle(e){
-        console.dir(e.target);
 
             let comptesBancaires = this.handleAccounts(e);
+
             this.setState({
                 person: {budgetMax :{
                             salaire: this.ridOfEmpty(e.target.form[0].value),
@@ -258,7 +290,8 @@ class Home extends Component {
                         budgetPreview : {
                             besoins: this.ridOfEmpty(e.target.form[12].value),
                             envies: this.ridOfEmpty(e.target.form[13].value),
-                            epargnes: this.ridOfEmpty(e.target.form[14].value)
+                            epargnes: this.ridOfEmpty(e.target.form[14].value),
+                            securite: this.ridOfEmpty(e.target.form[15].value)
                         },
                         comptesBancaires
                 }
@@ -271,7 +304,7 @@ class Home extends Component {
     }
 
     render() {
-
+        let vm = this;
         const user = this.state.user ? this.state.user : {};
 
         const budgetMax = this.state.person.budgetMax ? this.state.person.budgetMax : {};
@@ -305,88 +338,101 @@ class Home extends Component {
                             </div>
                             <div className="field">
                                 <label>{val.balanceCompte}</label>
-                                <input type="text" data-no={id} data-key={keysArr[id]} value={val.balanceCompte} placeholder="balance du compte" />
+                                <input type="text" data-no={id} data-key={keysArr[id]} value={val.balanceCompte} placeholder="Balance du compte" />
                             </div>
                         </div>);
         });
+        let totalBanque = null;
+        const showAcc = accArr.map(function(val, id){
+            totalBanque += val.balanceCompte;
+            return (
+                <div className="item" key={id}>{val.nomBanque} <span>{vm.beautifyNumber(val.balanceCompte)}</span></div>
+            )
+        });
 
+
+        let coussin = totalRevenus * budgetPreview.securite;
+        let percent = (totalBanque/coussin) * 100;
+
+        if(this.refs.securite){
+//            console.log(this.refs.securite, budgetPreview.securite, percent);
+            this.refs.securite.style.width = percent.toString()+"%";
+            this.refs.securite.style.backgroundColor = this.manageColor(percent/100);
+        }
 
         return (
             <div>
                 <NavBar disconnect={this.SignOut} authedUser={this.state.user}  AjouterInfos={this.addInfos} />
 
 
-                    <div className="ui">
-                        <div className="ui center aligned container">
-                            <div className="ui grid">
-                                <div className="eight wide phone eight wide tablet four wide computer column">
-                                    <div className="ui statistic column custom-statistic custom-blue">
-                                        <div className="value custom-white">
-                                            {this.beautifyNumber(budgetMax.salaire - budgetMax.impots + budgetMax.autresRevenus)}
-                                        </div>
-                                        <div className="label custom-white">
-                                            Salaire/Mensuel
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="eight wide phone eight wide tablet four wide computer column padded">
-                                    <div className="ui statistic custom-statistic custom-red">
-                                        <div className="value custom-white">
-                                            {this.beautifyNumber((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview.envies/100)}
-                                        </div>
-                                        <div className="label custom-white">
-                                            Envies/30%
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="eight wide phone eight wide tablet four wide computer column">
-                                    <div className="ui statistic custom-statistic custom-violet">
-                                        <div className="value custom-white">
-                                            {this.beautifyNumber((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview.besoins/100)}
-                                        </div>
-                                        <div className="label custom-white">
-                                            Besoins/50%
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="eight wide phone eight wide tablet four wide computer column">
-                                    <div className="ui statistic custom-statistic custom-teal">
-                                        <div className="value custom-white">
-                                            {this.beautifyNumber((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview.epargnes/100)}
-                                        </div>
-                                        <div className="label custom-white">
-                                            Epargne/20%
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-
                 <div className="ui center aligned container">
-                    <div className="ui stackable grid">
-                        <div className="six wide column">
-                            <div className="ui segment">
-                                <div className="ui top attached custom-label"><h3 className="header">Dépenses Prévisionnelles</h3> </div>
-                                <Pie data={this.state.previewData} options={this.state.options} />
+                    <div className="ui grid">
+                        <div className="eight wide phone eight wide tablet four wide computer column">
+                            <div className="ui statistic column custom-statistic custom-blue">
+                                <div className="value custom-white">
+                                    {this.beautifyNumber(budgetMax.salaire - budgetMax.impots + budgetMax.autresRevenus)}
+                                </div>
+                                <div className="label custom-white">
+                                    Salaire/Mensuel
+                                </div>
                             </div>
                         </div>
-                        <div className="six wide column">
-                            <div className="ui segment">
-                                <div className="ui top attached custom-label"><h3 className="header">Dépenses Réelles</h3></div>
-                                <Pie data={this.state.realData} options={this.state.options} />
+                        <div className="eight wide phone eight wide tablet four wide computer column padded">
+                            <div className="ui statistic custom-statistic custom-red">
+                                <div className="value custom-white">
+                                    {this.beautifyNumber((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview.envies/100)}
+                                </div>
+                                <div className="label custom-white">
+                                    Envies/30%
+                                </div>
+                            </div>
+                        </div>
+                        <div className="eight wide phone eight wide tablet four wide computer column">
+                            <div className="ui statistic custom-statistic custom-purple">
+                                <div className="value custom-white">
+                                    {this.beautifyNumber((budgetMax.salaire + budgetMax.autresRevenus) * budgetPreview.besoins/100)}
+                                </div>
+                                <div className="label custom-white">
+                                    Besoins/50%
+                                </div>
+                            </div>
+                        </div>
+                        <div className="eight wide phone eight wide tablet four wide computer column">
+                            <div className="ui statistic custom-statistic custom-teal">
+                                <div className="value custom-white">
+                                    {this.beautifyNumber(totalRevenus * budgetPreview.epargnes/100)}
+                                </div>
+                                <div className="label custom-white">
+                                    Epargne/20%
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="ui container">
+                <div className="ui center aligned container">
+                    <div className="ui stackable grid">
+                        <div className="eight wide tablet six wide computer column">
+                            <div className="ui segment custom-segment">
+                                <div className="ui top attached label"><h4 className="header">Dépenses Prévisionnelles</h4> </div>
+                                <Pie data={this.state.previewData} options={this.state.options} />
+                            </div>
+                        </div>
+                        <div className="eight wide tablet six wide computer column">
+                            <div className="ui segment custom-segment">
+                                <div className="ui top attached label"><h4 className="header">Dépenses Réelles</h4></div>
+                                <Pie data={this.state.realData} options={this.state.options} />
+                            </div>
+                        </div>
+                        <Quotes />
+                    </div>
+                </div>
+
+                <div className="ui center aligned container">
                     <div className="ui stackable grid">
                         <div className="six wide column">
-                            <div className="ui segment">
-                                <div className="ui top attached label"><h3 className="header">Revenus</h3> </div>
+                            <div className="ui segment custom-segment">
+                                <div className="ui top attached label"><h4 className="header">Revenus</h4> </div>
                                 <div className="ui list divided custom-list">
                                     {revenus}
                                     <div className="item">Revenu Net<span>{this.beautifyNumber(totalRevenus) || 0}</span></div>
@@ -394,11 +440,34 @@ class Home extends Component {
                             </div>
                         </div>
                         <div className="six wide column">
-                            <div className="ui segment">
-                                <div className="ui top attached label"><h3 className="header">Dépenses</h3> </div>
+                            <div className="ui segment custom-segment">
+                                <div className="ui top attached label"><h4 className="header">Dépenses</h4> </div>
                                 <div className="ui list divided custom-list">
                                     {depenses}
                                     <div className="item">Total Dépenses<span>{this.beautifyNumber(totalDepenses) || 0}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="eight wide tablet four wide computer column">
+                            <div className="ui segment custom-segment">
+                                <div className="ui top attached label"><h4 className="header">Comptes</h4></div>
+                                <div className="ui list divided custom-list">
+                                    {showAcc}
+                                    <div className="item">Total<span> {totalBanque ? this.beautifyNumber(totalBanque) : ''}</span></div>
+                                    <div className="item">
+                                        C. securite <span>{this.beautifyNumber(coussin)}</span>
+                                    </div>
+                                    <div className="item">
+                                        <div className="ui active progress">
+                                            <div ref="securite" className="bar">
+                                                <div className="progress">{(totalBanque/(totalRevenus * budgetPreview.securite) * 100).toFixed()}%</div>
+                                            </div>
+                                            <div className="label">Coussin de sécurité</div>
+                                        </div>
+                                    </div>
+                                    <div className="item">
+                                        Temps estimatif d'atteinte <span>{((coussin - totalBanque)/(totalRevenus * budgetPreview.epargnes/100)).toFixed()} mois</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -406,7 +475,7 @@ class Home extends Component {
                 </div>
 
                 <div ref="ajout" className="ui tiny long modal custom-modal">
-                            <div className="header">Ajouter Infos</div>
+                    <div className="header">Ajouter les paramètres de votre budget mensuel</div>
 
                             <div className="image content">
                                 <img src={logo} className="image custom-image"/>
@@ -504,6 +573,10 @@ class Home extends Component {
                                             <label>% Epargne</label>
                                             <input type="text" value={budgetPreview.epargnes} placeholder="% Epargne"  />
                                         </div>
+                                        <div className="field">
+                                            <label>Coussin de Sécurité</label>
+                                            <input type="number" min="3" max="6" value={budgetPreview.securite} placeholder="Coussin de Sécurité"  />
+                                        </div>
                                     </div>
 
                                     <div className="ui divider"></div>
@@ -579,11 +652,7 @@ class Home extends Component {
                     </div>
                 </div>
 
-
-
-
-
-               </div>
+            </div>
         );
     }
 }
